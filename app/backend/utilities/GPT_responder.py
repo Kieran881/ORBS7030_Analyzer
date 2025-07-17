@@ -39,7 +39,10 @@ async def get_response(human_input: str) -> str:
         return "Something went wrong with the request to the LLM. Please try again later."
 
     print(response.json())
-    return response.json()['choices'][0]['message']['content']
+    try:
+        return response.json()['choices'][0]['message']['content']
+    except:
+        return "Something went wrong with the request to the LLM. Please try again later."
 
 def formatChatHistory(chat_history: list[_ChatMessage]) -> str:
     formatted_history = ""
