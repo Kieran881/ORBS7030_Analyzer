@@ -1,0 +1,12 @@
+__pycache__/
+*.py[cod]
+bin/
+lib/
+share/
+pyvenv.cfg
+.DS_Store
+app/temp/*
+app/uploaded/*
+!app/temp/.gitkeep
+!app/uploaded/.gitkeep
+.env

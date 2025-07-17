@@ -1,0 +1,519 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {}, 
+   "source": [
+    "The dataset is based on the data of the Bank Customer Churn.\n",
+    "And I found three potential of the dataset:(1)Many of the balance of the customer are zero;(2)The customer complaint rate is relatively high;(3)Customer satisfaction is relatively low.\n",
+    "The number of observations are 15.The data show seventeen variables, each describing the information of the customers in bank.\n",
+    "The variables includes categorical and quanitative variables.\n"
+   ]
+  },
+
+  {
+   "cell_type": "code",
+   "execution_count": 24,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "      RowNumber  CustomerId    Surname  CreditScore Geography  Gender  Age  \\\n",
+      "0             1    15634602   Hargrave          619    France  Female   42   \n",
+      "1             2    15647311       Hill          608     Spain  Female   41   \n",
+      "2             3    15619304       Onio          502    France  Female   42   \n",
+      "3             4    15701354       Boni          699    France  Female   39   \n",
+      "4             5    15737888   Mitchell          850     Spain  Female   43   \n",
+      "...         ...         ...        ...          ...       ...     ...  ...   \n",
+      "9995       9996    15606229   Obijiaku          771    France    Male   39   \n",
+      "9996       9997    15569892  Johnstone          516    France    Male   35   \n",
+      "9997       9998    15584532        Liu          709    France  Female   36   \n",
+      "9998       9999    15682355  Sabbatini          772   Germany    Male   42   \n",
+      "9999      10000    15628319     Walker          792    France  Female   28   \n",
+      "\n",
+      "      Tenure    Balance  NumOfProducts  HasCrCard  IsActiveMember  \\\n",
+      "0          2       0.00              1          1               1   \n",
+      "1          1   83807.86              1          0               1   \n",
+      "2          8  159660.80              3          1               0   \n",
+      "3          1       0.00              2          0               0   \n",
+      "4          2  125510.82              1          1               1   \n",
+      "...      ...        ...            ...        ...             ...   \n",
+      "9995       5       0.00              2          1               0   \n",
+      "9996      10   57369.61              1          1               1   \n",
+      "9997       7       0.00              1          0               1   \n",
+      "9998       3   75075.31              2          1               0   \n",
+      "9999       4  130142.79              1          1               0   \n",
+      "\n",
+      "      EstimatedSalary  Exited  Complain  Satisfaction Score Card Type  \\\n",
+      "0           101348.88       1         1                   2   DIAMOND   \n",
+      "1           112542.58       0         1                   3   DIAMOND   \n",
+      "2           113931.57       1         1                   3   DIAMOND   \n",
+      "3            93826.63       0         0                   5      GOLD   \n",
+      "4            79084.10       0         0                   5      GOLD   \n",
+      "...               ...     ...       ...                 ...       ...   \n",
+      "9995         96270.64       0         0                   1   DIAMOND   \n",
+      "9996        101699.77       0         0                   5  PLATINUM   \n",
+      "9997         42085.58       1         1                   3    SILVER   \n",
+      "9998         92888.52       1         1                   2      GOLD   \n",
+      "9999         38190.78       0         0                   3   DIAMOND   \n",
+      "\n",
+      "      Point Earned  \n",
+      "0              464  \n",
+      "1              456  \n",
+      "2              377  \n",
+      "3              350  \n",
+      "4              425  \n",
+      "...            ...  \n",
+      "9995           300  \n",
+      "9996           771  \n",
+      "9997           564  \n",
+      "9998           339  \n",
+      "9999           911  \n",
+      "\n",
+      "[10000 rows x 18 columns]\n"
+     ]
+    }
+   ],
+   "source": [
+    "#import the dataset\n",
+    "import pandas as pd\n",
+    "\n",
+    "data = pd.read_csv(\"7030.csv\")\n",
+    "print(data)"
+   ]
+  },
+
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Calculate and present the numerical descriptive statistics of 'Balance','Complain' and 'Satisfaction Score' in data set."
+   ]
+  },
+
+  {
+   "cell_type": "code",
+   "execution_count": 25,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Requirement already satisfied: numpy in c:\\users\\86137\\documents\\wpsdrive\\notloginpage\\lib\\site-packages (1.26.4)\n",
+      "Note: you may need to restart the kernel to use updated packages.\n"
+     ]
+    }
+   ],
+   "source": [
+    "pip install numpy\n"
+   ]
+  },
+
+  {
+   "cell_type": "code",
+   "execution_count": 26,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "0       1\n",
+      "1       1\n",
+      "2       1\n",
+      "3       0\n",
+      "4       0\n",
+      "       ..\n",
+      "9995    0\n",
+      "9996    0\n",
+      "9997    1\n",
+      "9998    1\n",
+      "9999    0\n",
+      "Name: Complain, Length: 10000, dtype: int64\n",
+      "Mean: 0.2044\n",
+      "Variance: 0.16263690369036904\n",
+      "Standard Deviation: 0.40328265979380895\n",
+      "Median: 0.0\n",
+      "Mode= 0\n",
+      "quantiles [0.0, 0.0, 0.0]\n",
+      "Coefficient of Variation: 1.9730071418483803\n",
+      "Coefficient of Variation: 1.97%\n"
+     ]
+    }
+   ],
+   "source": [
+    "import pandas as pd\n",
+    "\n",
+    "data = pd.read_csv(\"7030.csv\")\n",
+    "print(data['Complain'])\n",
+    "\n",
+    "import statistics\n",
+    "mean=(statistics.mean(data['Complain']))\n",
+    "print(\"Mean:\", mean)\n",
+    "variance=(statistics.variance(data['Complain']))\n",
+    "print(\"Variance:\", variance)\n",
+    "std_deviation=(statistics.stdev(data['Complain']))\n",
+    "print(\"Standard Deviation:\", std_deviation)\n",
+    "median=(statistics.median(data['Complain']))\n",
+    "print(\"Median:\",median)\n",
+    "mode=(statistics.mode(data['Complain']))\n",
+    "print(\"Mode=\",mode)\n",
+    "quantiles=(statistics.quantiles(data['Complain']))\n",
+    "print(\"quantiles\",quantiles)\n",
+    "coefficient_of_variation = std_deviation / mean\n",
+    "print(\"Coefficient of Variation:\", coefficient_of_variation)\n",
+    "print(f\"Coefficient of Variation: {coefficient_of_variation:.2f}%\")"
+   ]
+  },
+
+  {
+   "cell_type": "code",
+   "execution_count": 27,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "0            0.00\n",
+      "1        83807.86\n",
+      "2       159660.80\n",
+      "3            0.00\n",
+      "4       125510.82\n",
+      "          ...    \n",
+      "9995         0.00\n",
+      "9996     57369.61\n",
+      "9997         0.00\n",
+      "9998     75075.31\n",
+      "9999    130142.79\n",
+      "Name: Balance, Length: 10000, dtype: float64\n",
+      "Mean: 76485.889288\n",
+      "Variance: 3893436175.990742\n",
+      "Standard Deviation: 62397.405202385955\n",
+      "Median: 97198.54000000001\n",
+      "Mode= 0.0\n",
+      "quantiles= [0.0, 97198.54000000001, 127647.84]\n",
+      "Coefficient of Variation: 0.8158028334799735\n",
+      "Coefficient of Variation: 0.47%\n"
+     ]
+    }
+   ],
+   "source": [
+    "import pandas as pd\n",
+    "\n",
+    "data = pd.read_csv(\"7030.csv\")\n",
+    "print(data['Balance'])\n",
+    "\n",
+    "import statistics\n",
+    "mean2=(statistics.mean(data['Balance']))\n",
+    "print(\"Mean:\", mean2)\n",
+    "variance2=(statistics.variance(data['Balance']))\n",
+    "print(\"Variance:\", variance2)\n",
+    "std_deviation2=(statistics.stdev(data['Balance']))\n",
+    "print(\"Standard Deviation:\", std_deviation2)\n",
+    "median2=(statistics.median(data['Balance']))\n",
+    "print(\"Median:\",median2)\n",
+    "mode2=(statistics.mode(data['Balance']))\n",
+    "print(\"Mode=\",mode2)\n",
+    "quantiles2=(statistics.quantiles(data['Balance']))\n",
+    "print(\"quantiles=\",quantiles2)\n",
+    "coefficient_of_variation2= std_deviation2 / mean2\n",
+    "print(\"Coefficient of Variation:\", coefficient_of_variation2)\n",
+    "print(f\"Coefficient of Variation: {coefficient_of_variation3:.2f}%\")\n"
+   ]
+  },
+
+  {
+   "cell_type": "code",
+   "execution_count": 28,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "0       2\n",
+      "1       3\n",
+      "2       3\n",
+      "3       5\n",
+      "4       5\n",
+      "       ..\n",
+      "9995    1\n",
+      "9996    5\n",
+      "9997    3\n",
+      "9998    2\n",
+      "9999    3\n",
+      "Name: Satisfaction Score, Length: 10000, dtype: int64\n",
+      "Mean: 3.0138\n",
+      "Variance: 1.9766072207220722\n",
+      "Standard Deviation: 1.4059186394390226\n",
+      "Median: 3.0\n",
+      "Mode= 3\n",
+      "quantiles= [2.0, 3.0, 4.0]\n",
+      "Coefficient of Variation: 0.46649367557204285\n",
+      "Coefficient of Variation: 0.47%\n"
+     ]
+    }
+   ],
+   "source": [
+    "import pandas as pd\n",
+    "\n",
+    "data = pd.read_csv(\"7030.csv\")\n",
+    "print(data['Satisfaction Score'])\n",
+    "\n",
+    "import statistics\n",
+    "mean3=(statistics.mean(data['Satisfaction Score']))\n",
+    "print(\"Mean:\", mean3)\n",
+    "variance3=(statistics.variance(data['Satisfaction Score']))\n",
+    "print(\"Variance:\", variance3)\n",
+    "std_deviation3=(statistics.stdev(data['Satisfaction Score']))\n",
+    "print(\"Standard Deviation:\", std_deviation3)\n",
+    "median3=(statistics.median(data['Satisfaction Score']))\n",
+    "print(\"Median:\",median3)\n",
+    "mode3=(statistics.mode(data['Satisfaction Score']))\n",
+    "print(\"Mode=\",mode3)\n",
+    "quantiles3=(statistics.quantiles(data['Satisfaction Score']))\n",
+    "print(\"quantiles=\",quantiles3)\n",
+    "coefficient_of_variation3= std_deviation3 / mean3\n",
+    "print(\"Coefficient of Variation:\", coefficient_of_variation3)\n",
+    "print(f\"Coefficient of Variation: {coefficient_of_variation3:.2f}%\")\n"
+   ]
+  },
+
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": []
+  },
+
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Simulation of sampling distribution of sample mean"
+   ]
+  },
+
+  {
+   "cell_type": "code",
+   "execution_count": 29,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "<Axes: ylabel='Frequency'>"
+      ]
+     },
+     "execution_count": 29,
+     "metadata": {},
+     "output_type": "execute_result"
+    },
+    {
+     "data": {
+      "image/png": "iVBORw0KGgoAAAANSUhEUgAAAkcAAAGdCAYAAAAYDtcjAAAAOXRFWHRTb2Z0d2FyZQBNYXRwbG90bGliIHZlcnNpb24zLjkuMiwgaHR0cHM6Ly9tYXRwbG90bGliLm9yZy8hTgPZAAAACXBIWXMAAA9hAAAPYQGoP6dpAAAyDklEQVR4nO3dfXBU9d3//9dKkm1Ik1NC3Gy2xJipQMFE5zK0SaiV+0AkRMG5wGIjKKJWgeYCLit2rjHt1xKqF2Cvckm5uBiQGxvbEVo7aCRc3Fgawk00CkgprYAgCUGabAjGDYbP7w9/nDlLuF1CNoHnY+bMcM5579n3+fTYvObs5+y6jDFGAAAAkCTdFO4GAAAAOhLCEQAAgAPhCAAAwIFwBAAA4EA4AgAAcCAcAQAAOBCOAAAAHAhHAAAADhHhbqCzOHPmjI4eParY2Fi5XK5wtwMAAC6DMUYnT56Uz+fTTTdd3j0hwtFlOnr0qJKTk8PdBgAACMHhw4fVo0ePy6olHF2m2NhYSV8NblxcXJi7AQAAl6OhoUHJycn23/HLQTi6TGc/SouLiyMcAQDQyVzJlBgmZAMAADgQjgAAABwIRwAAAA6EIwAAAAfCEQAAgAPhCAAAwIFwBAAA4EA4AgAAcCAcAQAAOBCOAAAAHAhHAAAADoQjAAAAB8IRAACAA+EIAADAISLcDUC69dm14W7hih2cMzLcLQAAcE1w5wgAAMCBcAQAAOBAOAIAAHAgHAEAADgQjgAAABwIRwAAAA6EIwAAAIewhqOFCxfqjjvuUFxcnOLi4pSdna23337b3j9x4kS5XK6gJSsrK+gYgUBAU6dOVUJCgmJiYpSfn68jR44E1dTV1amgoECWZcmyLBUUFKi+vr49ThEAAHQyYQ1HPXr00Jw5c7Rz507t3LlTgwcP1n333ac9e/bYNSNGjFB1dbW9vPXWW0HHKCws1Jo1a1RSUqItW7aosbFReXl5amlpsWvGjx+vqqoqlZaWqrS0VFVVVSooKGi38wQAAJ1HWL8he9SoUUHrv/jFL7Rw4UJVVFTo9ttvlyS53W55vd7zvt7v92vJkiVasWKFhg4dKklauXKlkpOTtX79eg0fPlx79+5VaWmpKioqlJmZKUlavHixsrOztW/fPvXu3fsaniEAAOhsOsyco5aWFpWUlOjUqVPKzs62t2/atEkej0e9evXS5MmTVVtba++rrKzU6dOnlZOTY2/z+XxKS0tTeXm5JGnr1q2yLMsORpKUlZUly7LsmvMJBAJqaGgIWgAAwPUv7OFo165d+vrXvy63260nn3xSa9asUd++fSVJubm5WrVqlTZs2KC5c+dqx44dGjx4sAKBgCSppqZGUVFR6tatW9AxExMTVVNTY9d4PJ5W7+vxeOya8ykuLrbnKFmWpeTk5LY6ZQAA0IGF/Ydne/furaqqKtXX1+uNN97QhAkTtHnzZvXt21fjxo2z69LS0tSvXz+lpKRo7dq1GjNmzAWPaYyRy+Wy153/vlDNuWbNmqXp06fb6w0NDQQkAABuAGEPR1FRUbrtttskSf369dOOHTv0q1/9SosWLWpVm5SUpJSUFO3fv1+S5PV61dzcrLq6uqC7R7W1terfv79dc+zYsVbHOn78uBITEy/Yl9vtltvtvqpzAwAAnU/YP1Y7lzHG/tjsXCdOnNDhw4eVlJQkScrIyFBkZKTKysrsmurqau3evdsOR9nZ2fL7/dq+fbtds23bNvn9frsGAADgrLDeOXruueeUm5ur5ORknTx5UiUlJdq0aZNKS0vV2NiooqIiPfDAA0pKStLBgwf13HPPKSEhQaNHj5YkWZalSZMmacaMGerevbvi4+M1c+ZMpaen20+v9enTRyNGjNDkyZPtu1GPP/648vLyeFINAAC0EtZwdOzYMRUUFKi6ulqWZemOO+5QaWmphg0bpqamJu3atUvLly9XfX29kpKSNGjQIL3++uuKjY21jzF//nxFRERo7Nixampq0pAhQ7Rs2TJ16dLFrlm1apWmTZtmP9WWn5+vBQsWtPv5AgCAjs9ljDHhbqIzaGhokGVZ8vv9iouLa9Nj3/rs2jY9Xns4OGdkuFsAAOCSQvn73eHmHAEAAIQT4QgAAMCBcAQAAOBAOAIAAHAgHAEAADgQjgAAABwIRwAAAA6EIwAAAAfCEQAAgAPhCAAAwIFwBAAA4EA4AgAAcCAcAQAAOBCOAAAAHAhHAAAADoQjAAAAB8IRAACAA+EIAADAgXAEAADgQDgCAABwIBwBAAA4EI4AAAAcCEcAAAAOhCMAAAAHwhEAAIAD4QgAAMCBcAQAAOBAOAIAAHAgHAEAADgQjgAAABwIRwAAAA6EIwAAAAfCEQAAgAPhCAAAwIFwBAAA4EA4AgAAcCAcAQAAOBCOAAAAHMIajhYuXKg77rhDcXFxiouLU3Z2tt5++217vzFGRUVF8vl8io6O1sCBA7Vnz56gYwQCAU2dOlUJCQmKiYlRfn6+jhw5ElRTV1engoICWZYly7JUUFCg+vr69jhFAADQyYQ1HPXo0UNz5szRzp07tXPnTg0ePFj33XefHYBefPFFzZs3TwsWLNCOHTvk9Xo1bNgwnTx50j5GYWGh1qxZo5KSEm3ZskWNjY3Ky8tTS0uLXTN+/HhVVVWptLRUpaWlqqqqUkFBQbufLwAA6PhcxhgT7iac4uPj9dJLL+nRRx+Vz+dTYWGhfvKTn0j66i5RYmKifvnLX+qJJ56Q3+/XzTffrBUrVmjcuHGSpKNHjyo5OVlvvfWWhg8frr1796pv376qqKhQZmamJKmiokLZ2dn661//qt69e19WXw0NDbIsS36/X3FxcW16zrc+u7ZNj9ceDs4ZGe4WAAC4pFD+fneYOUctLS0qKSnRqVOnlJ2drQMHDqimpkY5OTl2jdvt1oABA1ReXi5Jqqys1OnTp4NqfD6f0tLS7JqtW7fKsiw7GElSVlaWLMuya84nEAiooaEhaAEAANe/sIejXbt26etf/7rcbreefPJJrVmzRn379lVNTY0kKTExMag+MTHR3ldTU6OoqCh169btojUej6fV+3o8HrvmfIqLi+05SpZlKTk5+arOEwAAdA5hD0e9e/dWVVWVKioq9KMf/UgTJkzQRx99ZO93uVxB9caYVtvOdW7N+eovdZxZs2bJ7/fby+HDhy/3lAAAQCcW9nAUFRWl2267Tf369VNxcbHuvPNO/epXv5LX65WkVnd3amtr7btJXq9Xzc3Nqquru2jNsWPHWr3v8ePHW92VcnK73fZTdGcXAABw/Qt7ODqXMUaBQECpqanyer0qKyuz9zU3N2vz5s3q37+/JCkjI0ORkZFBNdXV1dq9e7ddk52dLb/fr+3bt9s127Ztk9/vt2sAAADOigjnmz/33HPKzc1VcnKyTp48qZKSEm3atEmlpaVyuVwqLCzU7Nmz1bNnT/Xs2VOzZ89W165dNX78eEmSZVmaNGmSZsyYoe7duys+Pl4zZ85Uenq6hg4dKknq06ePRowYocmTJ2vRokWSpMcff1x5eXmX/aQaAAC4cYQ1HB07dkwFBQWqrq6WZVm64447VFpaqmHDhkmSnnnmGTU1Nempp55SXV2dMjMztW7dOsXGxtrHmD9/viIiIjR27Fg1NTVpyJAhWrZsmbp06WLXrFq1StOmTbOfasvPz9eCBQva92QBAECn0OG+56ij4nuOgvE9RwCAzqBTf88RAABAR0A4AgAAcCAcAQAAOBCOAAAAHAhHAAAADoQjAAAAB8IRAACAA+EIAADAgXAEAADgQDgCAABwIBwBAAA4EI4AAAAcCEcAAAAOhCMAAAAHwhEAAIAD4QgAAMCBcAQAAOBAOAIAAHAgHAEAADgQjgAAABwIRwAAAA6EIwAAAAfCEQAAgAPhCAAAwIFwBAAA4EA4AgAAcCAcAQAAOBCOAAAAHAhHAAAADoQjAAAAB8IRAACAA+EIAADAgXAEAADgQDgCAABwIBwBAAA4EI4AAAAcCEcAAAAOYQ1HxcXF+s53vqPY2Fh5PB7df//92rdvX1DNxIkT5XK5gpasrKygmkAgoKlTpyohIUExMTHKz8/XkSNHgmrq6upUUFAgy7JkWZYKCgpUX19/rU8RAAB0MmENR5s3b9bTTz+tiooKlZWV6csvv1ROTo5OnToVVDdixAhVV1fby1tvvRW0v7CwUGvWrFFJSYm2bNmixsZG5eXlqaWlxa4ZP368qqqqVFpaqtLSUlVVVamgoKBdzhMAAHQeEeF889LS0qD1pUuXyuPxqLKyUvfcc4+93e12y+v1nvcYfr9fS5Ys0YoVKzR06FBJ0sqVK5WcnKz169dr+PDh2rt3r0pLS1VRUaHMzExJ0uLFi5Wdna19+/apd+/e1+gMAQBAZ9Oh5hz5/X5JUnx8fND2TZs2yePxqFevXpo8ebJqa2vtfZWVlTp9+rRycnLsbT6fT2lpaSovL5ckbd26VZZl2cFIkrKysmRZll1zrkAgoIaGhqAFAABc/zpMODLGaPr06br77ruVlpZmb8/NzdWqVau0YcMGzZ07Vzt27NDgwYMVCAQkSTU1NYqKilK3bt2CjpeYmKiamhq7xuPxtHpPj8dj15yruLjYnp9kWZaSk5Pb6lQBAEAHFtaP1ZymTJmiDz/8UFu2bAnaPm7cOPvfaWlp6tevn1JSUrR27VqNGTPmgsczxsjlctnrzn9fqMZp1qxZmj59ur3e0NBAQAIA4AbQIe4cTZ06VW+++aY2btyoHj16XLQ2KSlJKSkp2r9/vyTJ6/WqublZdXV1QXW1tbVKTEy0a44dO9bqWMePH7drzuV2uxUXFxe0AACA619Yw5ExRlOmTNHq1au1YcMGpaamXvI1J06c0OHDh5WUlCRJysjIUGRkpMrKyuya6upq7d69W/3795ckZWdny+/3a/v27XbNtm3b5Pf77RoAAAApzB+rPf3003rttdf0xz/+UbGxsfb8H8uyFB0drcbGRhUVFemBBx5QUlKSDh48qOeee04JCQkaPXq0XTtp0iTNmDFD3bt3V3x8vGbOnKn09HT76bU+ffpoxIgRmjx5shYtWiRJevzxx5WXl8eTagAAIEhYw9HChQslSQMHDgzavnTpUk2cOFFdunTRrl27tHz5ctXX1yspKUmDBg3S66+/rtjYWLt+/vz5ioiI0NixY9XU1KQhQ4Zo2bJl6tKli12zatUqTZs2zX6qLT8/XwsWLLj2JwkAADoVlzHGhLuJzqChoUGWZcnv97f5/KNbn13bpsdrDwfnjAx3CwAAXFIof787xIRsAACAjoJwBAAA4EA4AgAAcCAcAQAAOBCOAAAAHAhHAAAADoQjAAAAB8IRAACAA+EIAADAgXAEAADgQDgCAABwIBwBAAA4EI4AAAAcCEcAAAAOhCMAAAAHwhEAAIAD4QgAAMCBcAQAAOBAOAIAAHAIKRwdOHCgrfsAAADoEEIKR7fddpsGDRqklStX6osvvmjrngAAAMImpHD0wQcf6F/+5V80Y8YMeb1ePfHEE9q+fXtb9wYAANDuQgpHaWlpmjdvnj799FMtXbpUNTU1uvvuu3X77bdr3rx5On78eFv3CQAA0C6uakJ2RESERo8erd/97nf65S9/qX/84x+aOXOmevTooYcffljV1dVt1ScAAEC7uKpwtHPnTj311FNKSkrSvHnzNHPmTP3jH//Qhg0b9Omnn+q+++5rqz4BAADaRUQoL5o3b56WLl2qffv26d5779Xy5ct177336qabvspaqampWrRokb797W+3abMAAADXWkjhaOHChXr00Uf1yCOPyOv1nrfmlltu0ZIlS66qOQAAgPYWUjjav3//JWuioqI0YcKEUA4PAAAQNiHNOVq6dKl+//vft9r++9//Xq+++upVNwUAABAuIYWjOXPmKCEhodV2j8ej2bNnX3VTAAAA4RJSODp06JBSU1NbbU9JSdEnn3xy1U0BAACES0jhyOPx6MMPP2y1/YMPPlD37t2vuikA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",
+      "text/plain": [
+       "<Figure size 640x480 with 1 Axes>"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "sample_means_series = pd.Series(data['Balance'])\n",
+    "sample_means_series.plot(kind = 'hist')"
+   ]
+  },
+
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "The plot shows that the rest of the balances are close to a normal distribution with the exception of zero."
+   ]
+  },
+
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Conclusion：1.Incentivize customers with zero balances to save money；2.Motivate customers who don't complain to give a higher satisfaction;3.Reduce the complaint rate."
+   ]
+  },
+
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Hypothesis Testing\n",
+    "using Chi-squared test for independence\n"
+   ]
+  },
+
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "1.By adopting the Chi-squared test, we are able to decide whether two **categorical** variables of a population are independent.    \n",
+    "$H_0: \\text{gender and Card Type are independent}$ $\\quad$ vs $\\quad$\n",
+    "$H_1:\\text{gender and Card Type are not independent}$"
+   ]
+  },
+
+  {
+   "cell_type": "code",
+   "execution_count": 30,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "column percentage Card Type   DIAMOND     GOLD  PLATINUM    SILVER\n",
+      "Gender                                          \n",
+      "Female     0.463901  0.42446  0.465731  0.463141\n",
+      "Male       0.536099  0.57554  0.534269  0.536859\n",
+      "contingency_table Card Type  DIAMOND  GOLD  PLATINUM  SILVER\n",
+      "Gender                                    \n",
+      "Female        1163  1062      1162    1156\n",
+      "Male          1344  1440      1333    1340\n",
+      "Chi2 Statistic: 12.0205, p-value: 0.0073\n"
+     ]
+    }
+   ],
+   "source": [
+    "import matplotlib.pyplot as plt\n",
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "from scipy import stats     \n",
+    "\n",
+    "order =pd.read_csv(\"7030.csv\")\n",
+    "\n",
+    "from scipy.stats import chi2_contingency\n",
+    "\n",
+    "# Summarize the count in a contingency table\n",
+    "contingency_table_col = pd.crosstab(order['Gender'], order['Card Type'], normalize='columns')\n",
+    "print(\"column percentage\", contingency_table_col)\n",
+    "\n",
+    "contingency_table= pd.crosstab(order['Gender'], order['Card Type'])\n",
+    "print(\"contingency_table\", contingency_table)\n",
+    "\n",
+    "chi2, p, dof, expected = chi2_contingency(contingency_table)\n",
+    "print(f\"Chi2 Statistic: {chi2:.4f}, p-value: {p:.4f}\")"
+   ]
+  },
+
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Given that p-value is less than 0.05, we reject the null hypothesis and claimed that the association between gender and card type is significantly different from 0.   "
+   ]
+  },
+
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "2.By adopting the Chi-squared test, we are able to decide whether two **categorical** variables of a population are independent.    \n",
+    "$H_0: \\text{Complain and Satisfaction Score are independent}$ $\\quad$ vs $\\quad$\n",
+    "$H_1:\\text{Complain and Satisfaction Score are not independent}$"
+   ]
+  },
+
+  {
+   "cell_type": "code",
+   "execution_count": 54,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "column percentage Satisfaction Score         1         2         3         4         5\n",
+      "Complain                                                            \n",
+      "0                   0.799689  0.782522  0.801175  0.794323  0.800399\n",
+      "1                   0.200311  0.217478  0.198825  0.205677  0.199601\n",
+      "contingency_table Satisfaction Score     1     2     3     4     5\n",
+      "Complain                                        \n",
+      "0                   1545  1576  1636  1595  1604\n",
+      "1                    387   438   406   413   400\n",
+      "Chi2 Statistic: 3.0111, p-value: 0.5560\n"
+     ]
+    }
+   ],
+   "source": [
+    "import matplotlib.pyplot as plt\n",
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "from scipy import stats     \n",
+    "\n",
+    "order =pd.read_csv(\"7030.csv\")\n",
+    "\n",
+    "from scipy.stats import chi2_contingency\n",
+    "\n",
+    "# Summarize the count in a contingency table\n",
+    "contingency_table_col = pd.crosstab(order['Complain'], order['Satisfaction Score'], normalize='columns')\n",
+    "print(\"column percentage\", contingency_table_col)\n",
+    "\n",
+    "contingency_table= pd.crosstab(order['Complain'], order['Satisfaction Score'])\n",
+    "print(\"contingency_table\", contingency_table)\n",
+    "\n",
+    "chi2, p, dof, expected = chi2_contingency(contingency_table)\n",
+    "print(f\"Chi2 Statistic: {chi2:.4f}, p-value: {p:.4f}\")"
+   ]
+  },
+
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Given that p-value is more than 0.05, we fail to reject the null hypothesis and claimed that the association between Complain and Satisfaction Score is not significantly different from 0.   "
+   ]
+  },
+
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "I didn't use AI as a u-assist for this project. When using AI to help me learn, I think the biggest challenge is that it doesn't give me perfect answers and wastes my time, so I rely less on AI.But I think that using AI to assist my learning can better help me get in touch with the most up-to-date learning methods, and it can also help me think better about my learning tasks. And in some ways lighten my load.In some assignments, the formulas displayed by AI are not learned in textbooks, and may be different, so you need to be cautious when using AI for learning.In terms of programming, AI can be used to assist us in completing some basic theoretical learning, although I have not used it, but I think it should benefit a lot.. Here are my general opportunities and challenges I have faced when using it to assist my studies."
+   ]
+  },
+
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "I referred to teacher's teaching notebook during my analysis.\n"
+   ]
+  }
+ ],
+
+
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.12.7"
+  }
+ },
+ 
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
