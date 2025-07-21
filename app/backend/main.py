@@ -2,7 +2,7 @@ import os
 from fastapi import FastAPI, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from utilities import models, GPT_responder, mark_file_upload, packager
+from utilities import models, mark_file_upload, packager, GPT_responder
 
 # Main FastAPI application
 app = FastAPI()

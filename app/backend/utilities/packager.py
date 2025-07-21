@@ -69,4 +69,3 @@ def packNotebooks():
             pack(archivename=notebook)
             count += 1
 
-packNotebooks()

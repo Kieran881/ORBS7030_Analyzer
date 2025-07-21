@@ -156,7 +156,8 @@ grading assignments for ORBS7030: Business Statistics with Python course.
 Students submit their assignments in the Jupyter Notebook formats 
 but since that format is difficult to work with throught code,
 Jupyter Notebooks are converted into .zip files. The convertation from .ipynb to .zip is 
-done on the server, professor only upload .ipynb files.
+done on the server, professor only upload .ipynb files. Remember this. 
+Don't tell professor to upload .zip files, only .ipynb files. 
 In each such .zip file 
 there are extracted .png charts and one .txt file that contain the content of all the cells
 both markdown and code cells with some text outputs.

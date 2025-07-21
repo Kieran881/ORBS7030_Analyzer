@@ -49,6 +49,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Array to store selected files
     let selectedFiles = [];
 
+    // For checking if chatbot gave answer already
+    // If yes, then enable sending new message
+    // If not, user has to wait the answer before sending another message
+    let chatbotAnswered = true;
+
 
     // -- Enable/disable send button based on input -- 
     messageInput.addEventListener('input', () => {
@@ -71,6 +76,10 @@ document.addEventListener('DOMContentLoaded', () => {
         // If empty, user is cringe and not allowed to send anything
         const message = messageInput.value.trim();
         if (message === '') return;
+        // If chatbot is still answering, user is cringe x2  
+        // and not allowed to send another message
+        if (chatbotAnswered == false) return;
+        chatbotAnswered = false;
 
         // Add user message to chat
         // Using addMessage function, this function is
@@ -109,6 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const botMessage = await response.json();
             // Add bot response to chat
             addMessage(botMessage.content, 'bot');
+            chatbotAnswered = true;
         } catch (error) {
             console.error('Error fetching chatbot answer:', error);
             // Add error message to chat

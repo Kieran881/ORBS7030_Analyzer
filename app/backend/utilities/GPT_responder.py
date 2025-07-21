@@ -1,46 +1,41 @@
 from utilities.models import ChatMessage as _ChatMessage
 from utilities.models import systemPrompt, developerPrompt
 
-
-# Get LLM response
 async def get_response(human_input: str) -> str:
-    import requests
-    import json
+    from openai import OpenAI
     import os
 
-    OPEROUTER_API_KEY = os.environ.get("OPENROUTER_KEY")
-    try: 
-        response = requests.post(
-            url="https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {OPEROUTER_API_KEY}",
-                "HTTP-Referer": "<YOUR_SITE_URL>", # Optional. Site URL for rankings on openrouter.ai.
-                "X-Title": "<YOUR_SITE_NAME>", # Optional. Site title for rankings on openrouter.ai.
-            },
-            data=json.dumps({
-                "model": "openai/gpt-4.1", # Optional
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": systemPrompt
-                    },
-                    {
-                        "role": "developer",
-                        "content": developerPrompt
-                    },
-                    {
-                        "role": "user",
-                        "content": human_input
-                    }
-                ]
-            })
-        )
-    except:
-        return "Something went wrong with the request to the LLM. Please try again later."
-
-    print(response.json())
     try:
-        return response.json()['choices'][0]['message']['content']
+        OPEROUTER_API_KEY = os.environ.get("OPENROUTER_KEY")
+    except:
+        return "Sorry. Something went wrong with getting response from LLM (API key required)"
+
+    try:
+        client = OpenAI(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=OPEROUTER_API_KEY,
+        )
+        completion = client.chat.completions.create(
+            model="openai/gpt-4o",
+            messages=[
+                {
+                    "role": "system",
+                    "content": systemPrompt
+                },
+                {
+                    "role": "developer",
+                    "content": developerPrompt
+                },
+                {
+                    "role": "user",
+                    "content": human_input
+                }
+            ]
+        )
+        LLM_outputDICT: dict = completion.to_dict()
+        LLM_output: str = LLM_outputDICT['choices'][0]['message']['content']
+
+        return LLM_output
     except:
         return "Something went wrong with the request to the LLM. Please try again later."
 
