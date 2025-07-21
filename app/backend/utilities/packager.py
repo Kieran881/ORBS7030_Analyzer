@@ -58,9 +58,15 @@ def pack(archivename: str):
 def packNotebooks():
     import os
 
+    count = 1
     # Parse & Pack multiple notebooks
     for notebook in os.listdir(os.path.join("app", "uploaded")):
-        if notebook != ".DS_Store": 
+        
+        if notebook != ".DS_Store" and notebook != ".gitkeep": 
             # Parse & Pack single notebook
+            print(f"Count: {count}. Notebook: {notebook}")
             parse(filepath=os.path.join("app", "uploaded", notebook))
             pack(archivename=notebook)
+            count += 1
+
+packNotebooks()
