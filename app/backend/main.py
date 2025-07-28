@@ -2,7 +2,7 @@ import os
 from fastapi import FastAPI, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from utilities import models, mark_file_upload, packager, GPT_responder
+from utilities import models, mark_file_upload, GPT_responder, parser
 
 # Main FastAPI application
 app = FastAPI()
@@ -116,6 +116,8 @@ async def process_files(files: list[UploadFile]):
     chatHistory_as_a_string = GPT_responder.formatChatHistory(chatHistory)
 
     print(f"->Chat history so far: \n{chatHistory_as_a_string}")
+
+    parser.processNotebooks()
 
     return total_response
 

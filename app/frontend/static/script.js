@@ -99,7 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Trigger chatbot answer fetch
         fetchChatbotAnswer(message);
     };
-    // Backend API call for handling basic messages
+    // Backend API call for handling messages
     async function fetchChatbotAnswer(message) {
         try {
             // Send POST request to the backend API
@@ -151,13 +151,15 @@ document.addEventListener('DOMContentLoaded', () => {
         const marginClass = (sender === 'user' ? 'ml-2' : 'mr-2');
         const messageClass = (sender === 'user' ? 'message user-message p-3 shadow-sm' : 'message bot-message p-3 shadow-sm');
 
+        const markdownContent = text
+
         // Html structure prototype
         messageDiv.innerHTML = `
             <div class="w-8 h-8 rounded-full ${iconBgClass} flex items-center justify-center ${marginClass} flex-shrink-0">
                 <i class="fas ${iconClass} ${iconColorClass} text-sm"></i>
             </div>
             <div class="${messageClass}">
-                <p>${text}</p>
+                ${marked.parse(markdownContent)}
             </div>
         `;
 
