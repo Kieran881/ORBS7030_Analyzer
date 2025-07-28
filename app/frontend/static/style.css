@@ -64,3 +64,20 @@ body {
     background-color: #f3f4f6;
     border-radius: 6px;
 }
+
+/* Textarea specific styling */
+#message-input {
+    transition: height 0.1s ease;
+    overflow-y: auto;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+}
+
+#message-input::placeholder {
+    color: #9ca3af;
+}
+
+/* Ensure proper alignment in flex container */
+.flex.items-end #message-input {
+    align-self: stretch;
+}

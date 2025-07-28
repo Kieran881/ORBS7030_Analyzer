@@ -55,8 +55,23 @@ document.addEventListener('DOMContentLoaded', () => {
     let chatbotAnswered = true;
 
 
-    // -- Enable/disable send button based on input -- 
+    // -- Send message on Enter key, but allow Shift+Enter for new lines --
+    messageInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault(); // Prevent default Enter behavior (new line)
+            sendMessage();
+        }
+    });
+
+    // Auto-resize textarea as user types
     messageInput.addEventListener('input', () => {
+        // Reset height to auto to get the correct scrollHeight
+        messageInput.style.height = 'auto';
+        // Set height based on content, but respect min and max heights
+        const newHeight = Math.min(Math.max(messageInput.scrollHeight, 48), 128); // min 48px, max 128px
+        messageInput.style.height = newHeight + 'px';
+        
+        // Enable/disable send button based on input
         hasUserTyped = (messageInput.value.trim() === ''); // either true or false 
         sendBtn.disabled = hasUserTyped;
         if (sendBtn.disabled) {
@@ -127,12 +142,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     // -- Send message on button click -- 
     sendBtn.addEventListener('click', sendMessage);
-    // -- Send message on Enter key --
-    messageInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            sendMessage();
-        }
-    });
 
     // --- Add message to chat ----
     const addMessage = (text, sender) => {
@@ -154,14 +163,26 @@ document.addEventListener('DOMContentLoaded', () => {
         const markdownContent = text
 
         // Html structure prototype
-        messageDiv.innerHTML = `
-            <div class="w-8 h-8 rounded-full ${iconBgClass} flex items-center justify-center ${marginClass} flex-shrink-0">
-                <i class="fas ${iconClass} ${iconColorClass} text-sm"></i>
-            </div>
-            <div class="${messageClass}">
-                ${marked.parse(markdownContent)}
-            </div>
-        `;
+        if (sender == "user") {
+            let textHTML = text.replace("\n", "<br>");
+            messageDiv.innerHTML = `
+                <div class="w-8 h-8 rounded-full ${iconBgClass} flex items-center justify-center ${marginClass} flex-shrink-0">
+                    <i class="fas ${iconClass} ${iconColorClass} text-sm"></i>
+                </div>
+                <div class="${messageClass}">
+                    <p>${textHTML}</p>
+                </div>
+            `;
+        } else {
+            messageDiv.innerHTML = `
+                <div class="w-8 h-8 rounded-full ${iconBgClass} flex items-center justify-center ${marginClass} flex-shrink-0">
+                    <i class="fas ${iconClass} ${iconColorClass} text-sm"></i>
+                </div>
+                <div class="${messageClass}">
+                    ${marked.parse(markdownContent)}
+                </div>
+            `;
+        }
 
         // Append the message to chat messages container
         // Then scroll to the bottom of the chat container
