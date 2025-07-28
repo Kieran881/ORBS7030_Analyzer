@@ -30,8 +30,18 @@ def parse(filepath: str):
 # Convert each .ipynb file to .txt and remove the original
 def processNotebooks():
     import os
+    
+    uploaded_dir = os.path.join("app", "uploaded")
+    
+    # First, clean up any existing files from previous runs
+    for file in os.listdir(uploaded_dir):
+        if file.endswith(".ipynb") == False and file != ".gitkeep":
+            txt_file_path = os.path.join(uploaded_dir, file)
+            os.remove(txt_file_path)
+            print(f"Removed existing file: {file}")
+    
     # Process multiple notebooks
-    for notebook in os.listdir(os.path.join("app", "uploaded")):
+    for notebook in os.listdir(uploaded_dir):
         if notebook.endswith(".ipynb"):  # Only process .ipynb files
             # Parse single notebook
-            parse(filepath=os.path.join("app", "uploaded", notebook))
+            parse(filepath=os.path.join(uploaded_dir, notebook))
