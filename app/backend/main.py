@@ -13,7 +13,8 @@ app.mount("/static", StaticFiles(directory="app/frontend/static", html=True), na
 # Store chat history for LLM reference (LLM-memory)
 chatHistory: list[models.ChatMessage] = []
 filesList: list[str] = []
-filesUploaded = True
+currentNotebook: int = 0
+filesUploaded = False
 
 # Serve initial starting page
 @app.get("/")
@@ -23,6 +24,7 @@ async def serve_index():
     return FileResponse(os.path.join("app", "frontend", "index.html"))
 
 # Clear chat history, LLM's memory
+# TODO: Modify to also clean up all the files
 @app.post("/clear-chat-history")
 async def clear_chat_history():
     global chatHistory
@@ -35,12 +37,12 @@ async def chatbot_answer(message: models.ChatMessage):
     chatHistory.append(message)
     chatHistory_as_a_string = GPT_responder.formatChatHistory(chatHistory[0:-1])  # Exclude the last message for context
 
-    # chatbot_response = await GPT_responder.get_response(
-    #     human_input="Previous messages: \n" + \
-    #         chatHistory_as_a_string + \
-    #         "Current message: \n" + message.content
-    # )
-    chatbot_response = "Sample response based on the chat history and current message."
+    chatbot_response = await GPT_responder.get_response(
+        human_input="Previous messages: \n" + \
+            chatHistory_as_a_string + \
+            "Current message: \n" + message.content
+    )
+    # chatbot_response = "Sample response based on the chat history and current message."
 
     response_message = models.ChatMessage(role="bot", content=chatbot_response)
     chatHistory.append(response_message)
@@ -121,6 +123,7 @@ async def process_files(files: list[UploadFile]):
 
     # Removes any duplicates, just a safety check
     # if user accidentally uploadede the same notebook twices
+    # On my OS this is done automatically, not so sure about other platforms
     parser.removeDuplicates() 
 
     global filesUploaded
@@ -129,17 +132,28 @@ async def process_files(files: list[UploadFile]):
 
 # API endpoint to enter file analysis cycle
 @app.post("/start-analysis")
-def start_analysis():
+async def start_analysis():
+    global filesList
+    global currentNotebook
+
     # If user tries to use /start command before any files have been uploaded
     response_message: models.ChatMessage
     if filesUploaded == False:
         response_message = models.ChatMessage(
             role="bot", content="No Jupyter Notebooks found. Make sure to send them first!")
+        chatHistory.append(models.ChatMessage(role="user", content="/start"))
+        chatHistory.append(response_message)
+        return response_message
+    if currentNotebook > len(filesList):
+        response_message = models.ChatMessage(
+            role="bot", content="No more Notebooks left to analyze. If you have more, please upload them"
+        )
+        chatHistory.append(models.ChatMessage(role="user", content="/start"))
+        chatHistory.append(response_message)
         return response_message
     
     # Include list of notebook files to the history for LLM reference
     files_list: str = "Received Jupyter Notebooks:\n"
-    global filesList
     import os
 
     for file in os.listdir(os.path.join("app", "uploaded")):
@@ -147,8 +161,15 @@ def start_analysis():
             filesList.append(file)
             files_list = files_list + file + '\n' 
     
-    chatHistory.append(models.ChatMessage(role="user", content="/start"))
-    chatHistory.append(models.ChatMessage(role="bot", content="Starting analysis of the first notebook"))
+    chatbot_response = await GPT_responder.get_analysis(filesList[currentNotebook])
+
+    user_input = f"*User used \"start\" command*\n \
+*Server sent to you the notebook \"{filesList[currentNotebook]}\"* \
+*\"{filesList[currentNotebook]}\" text content:*\n \
+{parser.getCellContent(txt_path=os.path.join("app", "temp", f"{filesList[currentNotebook][:-6]}.txt"))}"
+
+    chatHistory.append(models.ChatMessage(role="user", content=user_input))
+    chatHistory.append(models.ChatMessage(role="bot", content=chatbot_response))
 
     chatHistory_as_a_string = GPT_responder.formatChatHistory(chatHistory)  
     chatHistory_as_a_string = files_list + chatHistory_as_a_string 
@@ -156,8 +177,11 @@ def start_analysis():
     print(chatHistory_as_a_string)
 
     response_message = models.ChatMessage(
-        role="bot", content="Starting analysis of the first notebook")
+        role="bot", content=chatbot_response)
     
     # TODO: Send to LLM notebook content, receive its response, manage memory
+
+    
+    currentNotebook += 1
 
     return response_message

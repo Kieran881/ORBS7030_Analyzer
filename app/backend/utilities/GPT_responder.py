@@ -19,8 +19,8 @@ async def get_response(human_input: str) -> str:
             api_key=OPEROUTER_API_KEY,
         )
         # For dev purposes override the uni prompts
-        systemPrompt = "Output text in markdown format"
-        developerPrompt = "Be yourself"
+        # systemPrompt = "Output text in markdown format"
+        # developerPrompt = "Be yourself"
         completion = client.chat.completions.create(
             model="openai/gpt-4o",
             messages=[
@@ -66,8 +66,8 @@ async def get_analysis(notebook_name: str) -> str:
             api_key=OPEROUTER_API_KEY,
         )
         # For dev purposes override the uni prompts
-        systemPrompt = "Output text in markdown format"
-        developerPrompt = "Be yourself"
+        # systemPrompt = "Output text in markdown format"
+        # developerPrompt = "Be yourself"
         completion = client.chat.completions.create(
             model="openai/gpt-4o",
             messages=[
