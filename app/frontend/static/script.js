@@ -96,23 +96,48 @@ document.addEventListener('DOMContentLoaded', () => {
         if (chatbotAnswered == false) return;
         chatbotAnswered = false;
 
-        // Add user message to chat
-        // Using addMessage function, this function is
-        // going to create and insert html <div></div> block 
-        // that contains the message (either by AI or user) to the html page (index.html)
-        addMessage(message, 'user');
+        if (message === "/start") {
+            console.log("Starting analysis of the first notebook")
 
-        // Clear input and disable send button, basically resetting the input field
-        // and making sure the user can't send empty messages 
-        // (disable button until user types something, 
-        // JS listens to any input, messageInput.addEventListener)
-        messageInput.value = '';
-        sendBtn.disabled = true;
-        sendBtn.classList.remove('text-blue-500');
-        sendBtn.classList.add('text-gray-500');
+            addMessage(message, 'user');
 
-        // Trigger chatbot answer fetch
-        fetchChatbotAnswer(message);
+            messageInput.value = '';
+            sendBtn.disabled = true;
+            sendBtn.classList.remove('text-blue-500');
+            sendBtn.classList.add('text-gray-500');
+            // Trigger sending request to analysis endpoint
+            fetchChatbotAnalysis(message)
+        } 
+        else if (message === "/next") {
+            console.log("Onto the next one")
+
+            addMessage(message, 'user');
+
+            messageInput.value = '';
+            sendBtn.disabled = true;
+            sendBtn.classList.remove('text-blue-500');
+            sendBtn.classList.add('text-gray-500');
+            // Trigger sending request to endpoint
+        }
+        else {
+            // Add user message to chat
+            // Using addMessage function, this function is
+            // going to create and insert html <div></div> block 
+            // that contains the message (either by AI or user) to the html page (index.html)
+            addMessage(message, 'user');
+
+            // Clear input and disable send button, basically resetting the input field
+            // and making sure the user can't send empty messages 
+            // (disable button until user types something, 
+            // JS listens to any input, messageInput.addEventListener)
+            messageInput.value = '';
+            sendBtn.disabled = true;
+            sendBtn.classList.remove('text-blue-500');
+            sendBtn.classList.add('text-gray-500');
+
+            // Trigger chatbot answer fetch
+            fetchChatbotAnswer(message);
+        }
     };
     // Backend API call for handling messages
     async function fetchChatbotAnswer(message) {
@@ -140,6 +165,34 @@ document.addEventListener('DOMContentLoaded', () => {
             addMessage('Sorry, I could not process your request. Please try again later.', 'bot');
         }
     }
+    // Backend API call for handling /start command
+    async function fetchChatbotAnalysis(message) {
+        try {
+            // Send POST request to the backend API
+            const response = await fetch('http://127.0.0.1:8000/start-analysis', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ role: 'user', content: message }) // Send message as JSON
+            });
+
+            if (response.ok == false) {
+                throw new Error('Something went wrong with the request');
+            }
+
+            const botMessage = await response.json();
+            // Add bot response to chat
+            addMessage(botMessage.content, 'bot');
+            chatbotAnswered = true;
+        } catch (error) {
+            console.error('Error fetching chatbot answer:', error);
+            // Add error message to chat
+            addMessage('Sorry, I could not process your request. Please try again later.', 'bot');
+        }
+    }
+
+
     // -- Send message on button click -- 
     sendBtn.addEventListener('click', sendMessage);
 
@@ -422,7 +475,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (failureMessages.length > 0) {
                 responseMessage += `Failures:\n${failureMessages.join('\n')}`;
             }
-            responseMessage += `. I can now help you analyze your notebooks\n`
+            responseMessage += `. I can now help you analyze your notebooks - just type '/start' command \n`
         }
 
         // Show the response message

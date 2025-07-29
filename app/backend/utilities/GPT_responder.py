@@ -15,6 +15,9 @@ async def get_response(human_input: str) -> str:
             base_url="https://openrouter.ai/api/v1",
             api_key=OPEROUTER_API_KEY,
         )
+        # For dev purposes override the uni prompts
+        systemPrompt = "Output text in markdown format"
+        developerPrompt = "Be yourself"
         completion = client.chat.completions.create(
             model="openai/gpt-4o",
             messages=[
@@ -40,7 +43,7 @@ async def get_response(human_input: str) -> str:
         return "Something went wrong with the request to the LLM. Please try again later."
 
 def formatChatHistory(chat_history: list[_ChatMessage]) -> str:
-    formatted_history = ""
+    formatted_history = "Chat history: \n"
     for message in chat_history:
         if message.role == "user":
             formatted_history += f"User: {message.content}\n"

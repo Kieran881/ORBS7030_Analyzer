@@ -12,6 +12,8 @@ app.mount("/static", StaticFiles(directory="app/frontend/static", html=True), na
 
 # Store chat history for LLM reference (LLM-memory)
 chatHistory: list[models.ChatMessage] = []
+filesList: list[str] = []
+filesUploaded = False
 
 # Serve initial starting page
 @app.get("/")
@@ -33,18 +35,18 @@ async def chatbot_answer(message: models.ChatMessage):
     chatHistory.append(message)
     chatHistory_as_a_string = GPT_responder.formatChatHistory(chatHistory[0:-1])  # Exclude the last message for context
 
-    chatbot_response = await GPT_responder.get_response(
-        human_input="Previous messages: \n" + \
-            chatHistory_as_a_string + \
-            "Current message: \n" + message.content
-    )
-    # chatbot_response = "Sample response based on the chat history and current message."
+    # chatbot_response = await GPT_responder.get_response(
+    #     human_input="Previous messages: \n" + \
+    #         chatHistory_as_a_string + \
+    #         "Current message: \n" + message.content
+    # )
+    chatbot_response = "Sample response based on the chat history and current message."
 
     response_message = models.ChatMessage(role="bot", content=chatbot_response)
     chatHistory.append(response_message)
     chatHistory_as_a_string = GPT_responder.formatChatHistory(chatHistory)
 
-    print(f"->Chat history so far: \n{chatHistory_as_a_string}")
+    print(chatHistory_as_a_string)
 
     return response_message
 
@@ -68,7 +70,7 @@ async def process_files(files: list[UploadFile]):
 
         file_name = file.filename.strip()
         
-        # Validate filename
+        # Validate filename 
         if not file_name or file_name.lower() == 'none':
             total_response["Invalid"] = {"Saved": False, "Context": "Invalid filename"}
             continue
@@ -115,11 +117,45 @@ async def process_files(files: list[UploadFile]):
     chatHistory.append(models.ChatMessage(role="user", content=mark_file_upload.markFileUpload(d=total_response)))
     chatHistory_as_a_string = GPT_responder.formatChatHistory(chatHistory)
 
-    print(f"->Chat history so far: \n{chatHistory_as_a_string}")
+    print(chatHistory_as_a_string)
 
     parser.processNotebooks()
 
+    global filesUploaded
+    filesUploaded = True
     return total_response
 
-# Parse and pack all saved files from /uploaded directory
-# packager.packNotebooks()
+# API endpoint to enter file analysis cycle
+@app.post("/start-analysis")
+def start_analysis():
+    # If user tries to use /start command before any files have been uploaded
+    response_message: models.ChatMessage
+    if filesUploaded == False:
+        response_message = models.ChatMessage(
+            role="bot", content="No Jupyter Notebooks found. Make sure to send them first!")
+        return response_message
+    
+    # Include list of notebook files to the history for LLM reference
+    files_list: str = "Received Jupyter Notebooks:\n"
+    global filesList
+    import os
+
+    for file in os.listdir(os.path.join("app", "uploaded")):
+        if file != ".gitkeep" and file != ".DS_Store":
+            file = file.replace(".txt", ".ipynb") # For display - to not confuse user
+            filesList.append(file)
+            files_list = files_list + file + '\n' 
+    
+    
+    chatHistory.append(models.ChatMessage(role="user", content="/start"))
+    chatHistory.append(models.ChatMessage(role="bot", content="Starting analysis of the first notebook"))
+
+    chatHistory_as_a_string = GPT_responder.formatChatHistory(chatHistory)  
+    chatHistory_as_a_string = files_list + chatHistory_as_a_string 
+
+    print(chatHistory_as_a_string)
+
+    response_message = models.ChatMessage(
+        role="bot", content="Starting analysis of the first notebook")
+    return response_message
+    # TODO: Actually implement automatic sending the first notebook's content along with /start message
