@@ -13,7 +13,7 @@ app.mount("/static", StaticFiles(directory="app/frontend/static", html=True), na
 # Store chat history for LLM reference (LLM-memory)
 chatHistory: list[models.ChatMessage] = []
 filesList: list[str] = []
-filesUploaded = False
+filesUploaded = True
 
 # Serve initial starting page
 @app.get("/")
@@ -119,7 +119,9 @@ async def process_files(files: list[UploadFile]):
 
     print(chatHistory_as_a_string)
 
-    parser.processNotebooks()
+    # Removes any duplicates, just a safety check
+    # if user accidentally uploadede the same notebook twices
+    parser.removeDuplicates() 
 
     global filesUploaded
     filesUploaded = True
@@ -142,10 +144,8 @@ def start_analysis():
 
     for file in os.listdir(os.path.join("app", "uploaded")):
         if file != ".gitkeep" and file != ".DS_Store":
-            file = file.replace(".txt", ".ipynb") # For display - to not confuse user
             filesList.append(file)
             files_list = files_list + file + '\n' 
-    
     
     chatHistory.append(models.ChatMessage(role="user", content="/start"))
     chatHistory.append(models.ChatMessage(role="bot", content="Starting analysis of the first notebook"))
@@ -157,5 +157,7 @@ def start_analysis():
 
     response_message = models.ChatMessage(
         role="bot", content="Starting analysis of the first notebook")
+    
+    # TODO: Send to LLM notebook content, receive its response, manage memory
+
     return response_message
-    # TODO: Actually implement automatic sending the first notebook's content along with /start message
