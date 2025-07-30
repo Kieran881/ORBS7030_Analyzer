@@ -32,32 +32,18 @@ def markFileUpload(historySoFar: list[_ChatMessage], d: dict[str, dict[str, str 
 
     return updatedHistory
 
-# Turn chat history list of messages into a formatted string log for LLM reference
-# TODO: Format chat history the way OpenAI expects - multiple messages, 
-# not just one big-ass message. Chat history as a list of dictionaries (messages),
-# rather than just one dictionary with very long message content
+# Turn chat history into list of messages for LLM reference
 from openai.types.chat.chat_completion_message_param import ChatCompletionMessageParam
-def formatChatHistory_V2(chat_history: list[_ChatMessage]) -> list[ChatCompletionMessageParam]:
+def formatChatHistory(chat_history: list[_ChatMessage]) -> list[ChatCompletionMessageParam]:
     formatted_history = []
     for message in chat_history:
         if message.role == "user":
             formatted_history.append({"role": "user", "content": message.content})
-        elif message.role == "bot":
+        elif message.role == "bot" or message.role == "assistant":
             formatted_history.append({"role": "assistant", "content": message.content})
         else: # for dev purposes
             print("--- SOME SHIT HAPPENED ----")
             exit()
-    return formatted_history
-
-def formatChatHistory(chat_history: list[_ChatMessage]) -> str:
-    formatted_history = ""
-    for message in chat_history:
-        if message.role == "user":
-            formatted_history += f"User: {message.content}\n"
-        elif message.role == "bot":
-            formatted_history += f"Bot: {message.content}\n"
-        else:
-            formatted_history += "\n"
     return formatted_history
 
 def markContentSending(filesList, currentNotebook) -> str:

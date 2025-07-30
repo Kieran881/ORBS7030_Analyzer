@@ -1,17 +1,18 @@
 # TODO: Create a proper system (developer) prompt, ask Dr Wu for examples to feed to LLM
 # TODO: Implement token counting mechanism so that the model output
 # won't get suddenly truncated (context window) - recommend user to clear chat history
-# TODO: Format chat history the way OpenAI expects - multiple messages, 
+# TODO -- DONE: Format chat history the way OpenAI expects - multiple messages, 
 # not just one big-ass message. Chat history as a list of dictionaries (messages),
 # rather than just one dictionary with very long message content
-# TODO: Implement the chat history compression where after we analyzed one notebook,
+# not todo: Implement the chat history compression where after we analyzed one notebook,
 # its content and analysises will not be in full text but rather as just a few sentences,
 # just enough to provide context for LLM on what happened before and nothing more
+# Status: Since analyzing one notebook is ~15k tokens and we have 1000k tokens for context,
+# probably unneccessary feature
 # 
 # Some info about GPT4.1 for reference
 # 1,047,576 tokens context window
 # 32,768 tokens max output 
-
 import os
 from fastapi import FastAPI, UploadFile
 from fastapi.responses import FileResponse
@@ -66,20 +67,17 @@ async def clear_chat_history():
 async def chatbot_answer(message: models.ChatMessage):
     global chatHistory
 
+    # Update history for using in this request endpoint
     chatHistory = chat_history.markNewMessage(chatHistory, message.role, message.content)
-    # chatHistory_as_a_string = chat_history.formatChatHistory(chatHistory[0:-1])  # Exclude the last message for context
-
-    chat_messages = chat_history.formatChatHistory_V2(chatHistory)
-    # chatbot_response = "Sample response based on the chat history and current message."
+    chat_messages = chat_history.formatChatHistory(chatHistory)
 
     # human_inout is now a list of dictionaries with previous messages and the current one
-    chatbot_response = await GPT_responder.get_response(
-        human_input=chat_messages
-    )
+    print(chat_messages)
+    chatbot_response = await GPT_responder.get_response(human_input=chat_messages)
 
+    # Update history for using in other request endpoints 
     response_message = models.ChatMessage(role="bot", content=chatbot_response)
     chatHistory = chat_history.markNewMessage(chatHistory, "bot", chatbot_response)
-    # chatHistory_as_a_string = chat_history.formatChatHistory(chatHistory)
 
     return response_message
 
@@ -197,26 +195,12 @@ async def start_analysis():
     
     chatbot_response = await GPT_responder.get_analysis(filesList[currentNotebook])
 
-    # I have a good fucking idea
-    # What if I will make not one ugly user_input where I try to combine all stuff
-    # like context of user&server actions for LLM, chat history, and notebook content
-    # Instead, I propose creating a function that will connect all the things automatically
-    # Plus, that way it will be much more clearer to implement notebook forgetting 
-    # We will have chat history as usual, 
-    # then notebook content (very long) with analysises (also very long),
-    # And continued chat with another content + analysises
-    # I propose that by outsourcing marking content + analysis by function,
-    # We can reduce the length of history we are sending to LLM considerably
-    # When user submits /next then we will simply replace 
-    # content + analysis of the previous notebook by some context (*You and user analyzed notebook 69.ipynb*)
-    # And the cycle continues on
     user_input = chat_history.markContentSending(filesList, currentNotebook)
 
     chatHistory = chat_history.markNewMessage(chatHistory, "user", user_input)
     chatHistory = chat_history.markNewMessage(chatHistory, "bot", chatbot_response)
 
-    response_message = models.ChatMessage(
-        role="bot", content=chatbot_response)
+    response_message = models.ChatMessage(role="bot", content=chatbot_response)
     
     currentNotebook += 1
 
