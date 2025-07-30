@@ -1,4 +1,4 @@
-def cleaner(folder_path: str) -> None:
+def clean(folder_path: str) -> None:
     """
     Cleans up the specified folder by removing all files and subdirectories.
 

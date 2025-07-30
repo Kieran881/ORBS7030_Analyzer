@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (chatbotAnswered == false) return;
         chatbotAnswered = false;
 
-        if (message === "/start") {
+        if ((message.toLowerCase() === "/start") || (message.toLowerCase() === "start")) {
             console.log("Starting analysis of the first notebook")
 
             addMessage(message, 'user');
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Trigger sending request to analysis endpoint
             fetchChatbotAnalysis(message)
         } 
-        else if (message === "/next") {
+        else if ((message.toLowerCase() === "/next") || (message.toLowerCase() === "next")) {
             console.log("Onto the next one")
 
             addMessage(message, 'user');
@@ -118,6 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
             sendBtn.classList.remove('text-blue-500');
             sendBtn.classList.add('text-gray-500');
             // Trigger sending request to endpoint
+            addMessage("I received your \"\next\" command", 'bot'); // for dev, for now
         }
         else {
             // Add user message to chat
