@@ -2,7 +2,7 @@ import os
 from fastapi import FastAPI, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from utilities import models, mark_file_upload, GPT_responder, parser, cleaner
+from utilities import models, chat_history, GPT_responder, parser, cleaner
 
 # Main FastAPI application
 app = FastAPI()
@@ -40,7 +40,7 @@ async def clear_chat_history():
 @app.post("/chatbot-answer")
 async def chatbot_answer(message: models.ChatMessage):
     chatHistory.append(message)
-    chatHistory_as_a_string = GPT_responder.formatChatHistory(chatHistory[0:-1])  # Exclude the last message for context
+    chatHistory_as_a_string = chat_history.formatChatHistory(chatHistory[0:-1])  # Exclude the last message for context
 
     chatbot_response = await GPT_responder.get_response(
         human_input="Previous messages: \n" + \
@@ -51,7 +51,7 @@ async def chatbot_answer(message: models.ChatMessage):
 
     response_message = models.ChatMessage(role="bot", content=chatbot_response)
     chatHistory.append(response_message)
-    chatHistory_as_a_string = GPT_responder.formatChatHistory(chatHistory)
+    chatHistory_as_a_string = chat_history.formatChatHistory(chatHistory)
 
     print(chatHistory_as_a_string)
 
@@ -121,8 +121,8 @@ async def process_files(files: list[UploadFile]):
         except Exception as e:
             total_response[file_name] = {"Saved": False, "Context": f"Unexpected error: {str(e)}"}
 
-    chatHistory.append(models.ChatMessage(role="user", content=mark_file_upload.markFileUpload(d=total_response)))
-    chatHistory_as_a_string = GPT_responder.formatChatHistory(chatHistory)
+    chatHistory.append(models.ChatMessage(role="user", content=chat_history.markFileUpload(d=total_response)))
+    chatHistory_as_a_string = chat_history.formatChatHistory(chatHistory)
 
     print(chatHistory_as_a_string)
 
@@ -174,7 +174,7 @@ async def start_analysis():
     chatHistory.append(models.ChatMessage(role="user", content=user_input))
     chatHistory.append(models.ChatMessage(role="bot", content=chatbot_response))
 
-    chatHistory_as_a_string = GPT_responder.formatChatHistory(chatHistory)  
+    chatHistory_as_a_string = chat_history.formatChatHistory(chatHistory)  
     chatHistory_as_a_string = files_list + chatHistory_as_a_string 
 
     print(chatHistory_as_a_string)

@@ -1,12 +1,14 @@
-from utilities.models import ChatMessage as _ChatMessage
-from utilities.models import systemPrompt, developerPrompt
-from utilities.parser import unpackNotebook as _unpackNotebook
-from utilities.parser import encodePDF as _encodePDF
-from utilities.parser import getCellContent as _getCellContent
-
+"""
+Get response from LLM (OpenRouter API) based on user input.
+User input is just a plain text, not analysis commands.
+Output is the response from LLM, not analysis result.
+Input: human_input (str) - user input text
+Output: LLM response (str)
+"""
 async def get_response(human_input: str) -> str:
     from openai import OpenAI
     import os
+    from utilities.models import systemPrompt, developerPrompt
 
     try:
         OPEROUTER_API_KEY = os.environ.get("OPENROUTER_KEY")
@@ -18,6 +20,7 @@ async def get_response(human_input: str) -> str:
             base_url="https://openrouter.ai/api/v1",
             api_key=OPEROUTER_API_KEY,
         )
+        print("Key")
         # For dev purposes override the uni prompts
         # systemPrompt = "Output text in markdown format"
         # developerPrompt = "Be yourself"
@@ -39,15 +42,22 @@ async def get_response(human_input: str) -> str:
             ]
         )
         LLM_outputDICT: dict = completion.to_dict()
+        print(LLM_outputDICT)
         LLM_output: str = LLM_outputDICT['choices'][0]['message']['content']
 
         return LLM_output
     except:
         return "Something went wrong with the request to the LLM. Please try again later."
 
+"""
+Get analysis of a Jupyter Notebook file using LLM (OpenRouter API).
+Input: notebook_name (str) - name of the Jupyter Notebook file
+Output: LLM analysis result (str)
+"""
 async def get_analysis(notebook_name: str) -> str:
     from openai import OpenAI
     import os
+    from utilities.models import systemPrompt, developerPrompt
 
     message: list = []
     try:
@@ -89,23 +99,21 @@ async def get_analysis(notebook_name: str) -> str:
     except:
         return "Something went wrong with the request to the LLM. Please try again later."
 
-def formatChatHistory(chat_history: list[_ChatMessage]) -> str:
-    formatted_history = "Chat history: \n"
-    for message in chat_history:
-        if message.role == "user":
-            formatted_history += f"User: {message.content}\n"
-        elif message.role == "bot":
-            formatted_history += f"Bot: {message.content}\n"
-        else:
-            formatted_history += "\n"
-    return formatted_history
-
+"""
+Convert a Jupyter Notebook file to a format suitable for LLM request.
+Input: notebook_name (str) - name of the Jupyter Notebook file
+Output: message (list) - formatted message (request) for LLM with all needed info
+"""
 def notebookToLLMRequest(notebook_name: str) -> list:
     # Will return list structure with embedded cell content 
     # and charts packed in one PDF file (base64 str) from one .ipynb notebook
 
     # .ipynb --> .txt + .pdf
     from os import path
+    from utilities.parser import unpackNotebook as _unpackNotebook
+    from utilities.parser import encodePDF as _encodePDF
+    from utilities.parser import getCellContent as _getCellContent
+
     _unpackNotebook(filepath=path.join("app", "uploaded", notebook_name))
 
     # .txt --> str
