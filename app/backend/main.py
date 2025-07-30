@@ -23,17 +23,28 @@ filesUploaded = False
 @app.get("/")
 async def serve_index():
     global chatHistory
+    global filesUploaded
+
     chatHistory.clear()
+    filesUploaded = False
+
     cleaner.clean(os.path.join("app", "temp"))  # Clean temp folder
     cleaner.clean(os.path.join("app", "uploaded")) # Clean uploaded folder
+
     return FileResponse(os.path.join("app", "frontend", "index.html"))
 
 # Clear chat history, LLM's memory
-# TODO: Modify to also clean up all the files from server memory
 @app.post("/clear-chat-history")
 async def clear_chat_history():
     global chatHistory
-    chatHistory.clear()  # or chatHistory = []
+    global filesUploaded
+
+    chatHistory.clear() 
+    filesUploaded = False
+
+    cleaner.clean(os.path.join("app", "temp"))  
+    cleaner.clean(os.path.join("app", "uploaded")) 
+
     return {"status": "success", "message": "Chat history cleared"}
 
 # Send API request to a LLM and update the chat history
@@ -49,9 +60,6 @@ async def chatbot_answer(message: models.ChatMessage):
             chatHistory_as_a_string + \
             "Current message sent by user: \n" + message.content
     )
-    print("Previous messages by you and user (chat context): \n" + \
-            chatHistory_as_a_string + \
-            "Current message sent by user: \n" + message.content)
     # chatbot_response = "Sample response based on the chat history and current message."
 
     response_message = models.ChatMessage(role="bot", content=chatbot_response)
@@ -73,9 +81,10 @@ async def process_files(files: list[UploadFile]):
     upload_dir = os.path.join("app", "uploaded") 
     os.makedirs(upload_dir, exist_ok=True)
 
-    cleaner.clean(os.path.join("app", "temp"))  # Clean temp folder
-    cleaner.clean(os.path.join("app", "uploaded")) # Clean uploaded folder
+    cleaner.clean(os.path.join("app", "temp"))  
+    cleaner.clean(os.path.join("app", "uploaded")) 
 
+    # Different checks & saving the files
     for file in files:
         # Check if file exists and has a filename
         if not file or not file.filename:
@@ -133,10 +142,11 @@ async def process_files(files: list[UploadFile]):
     # Removes any duplicates, just a safety check
     # if user accidentally uploadede the same notebook twices
     # On my OS this is done automatically, not so sure about other platforms
-    parser.removeDuplicates() 
+    cleaner.removeDuplicates(os.path.join("app", "uploaded"))
 
     global filesUploaded
     filesUploaded = True
+
     return total_response
 
 # API endpoint to enter file analysis cycle

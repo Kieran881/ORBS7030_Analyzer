@@ -20,7 +20,6 @@ async def get_response(human_input: str) -> str:
             base_url="https://openrouter.ai/api/v1",
             api_key=OPEROUTER_API_KEY,
         )
-        print("Key")
         # For dev purposes override the uni prompts
         # systemPrompt = "Output text in markdown format"
         # developerPrompt = "Be yourself"
@@ -42,7 +41,6 @@ async def get_response(human_input: str) -> str:
             ]
         )
         LLM_outputDICT: dict = completion.to_dict()
-        print(LLM_outputDICT)
         LLM_output: str = LLM_outputDICT['choices'][0]['message']['content']
 
         return LLM_output

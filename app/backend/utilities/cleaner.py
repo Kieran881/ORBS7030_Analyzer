@@ -25,3 +25,13 @@ def clean(folder_path: str) -> None:
         print(f"Folder {folder_path} has been cleaned.")
     except Exception as e:
         print(f"An error occurred while cleaning the folder: {e}")
+
+def removeDuplicates(folder_path: str) -> None:
+    # Go to the directory "app/uploaded" and delete any duplicate files
+    import os
+    seen_files = set()
+    for filename in os.listdir(folder_path):
+        if filename in seen_files:
+            os.remove(os.path.join(folder_path, filename))
+        else:
+            seen_files.add(filename)

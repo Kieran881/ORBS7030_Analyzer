@@ -1,14 +1,3 @@
-def removeDuplicates():
-    # Go to the directory "app/uploaded" and delete any duplicate files
-    import os
-    uploaded_dir = os.path.join("app", "uploaded")
-    seen_files = set()
-    for filename in os.listdir(uploaded_dir):
-        if filename in seen_files:
-            os.remove(os.path.join(uploaded_dir, filename))
-        else:
-            seen_files.add(filename)
-
 def unpackNotebook(filepath: str):
     # Take one .ipynb and turns it into two files
     # .txt with all cell text content and
