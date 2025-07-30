@@ -5,6 +5,13 @@ class ChatMessage(BaseModel):
     role: str
     content: str
 
+LLM_MODEL = "openai/gpt-4.1-2025-04-14"
+
+DEVELOPER_PROMPT = """
+<Here goes our super duper majestic asf system (developer) prompt>
+"""
+
+
 systemPrompt = """
 You are a chatbot deployed by the Hong Kong Baptist University to assist 
 the teaching stuff of the Department of Mathematics in the 

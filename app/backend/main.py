@@ -1,3 +1,17 @@
+# TODO: Create a proper system (developer) prompt, ask Dr Wu for examples to feed to LLM
+# TODO: Implement token counting mechanism so that the model output
+# won't get suddenly truncated (context window) - recommend user to clear chat history
+# TODO: Format chat history the way OpenAI expects - multiple messages, 
+# not just one big-ass message. Chat history as a list of dictionaries (messages),
+# rather than just one dictionary with very long message content
+# TODO: Implement the chat history compression where after we analyzed one notebook,
+# its content and analysises will not be in full text but rather as just a few sentences,
+# just enough to provide context for LLM on what happened before and nothing more
+# 
+# Some info about GPT4.1 for reference
+# 1,047,576 tokens context window
+# 32,768 tokens max output 
+
 import os
 from fastapi import FastAPI, UploadFile
 from fastapi.responses import FileResponse
@@ -53,18 +67,19 @@ async def chatbot_answer(message: models.ChatMessage):
     global chatHistory
 
     chatHistory = chat_history.markNewMessage(chatHistory, message.role, message.content)
-    chatHistory_as_a_string = chat_history.formatChatHistory(chatHistory[0:-1])  # Exclude the last message for context
+    # chatHistory_as_a_string = chat_history.formatChatHistory(chatHistory[0:-1])  # Exclude the last message for context
 
-    chatbot_response = await GPT_responder.get_response(
-        human_input="Previous messages by you and user (chat context): \n" + \
-            chatHistory_as_a_string + \
-            "Current message sent by user: \n" + message.content
-    )
+    chat_messages = chat_history.formatChatHistory_V2(chatHistory)
     # chatbot_response = "Sample response based on the chat history and current message."
+
+    # human_inout is now a list of dictionaries with previous messages and the current one
+    chatbot_response = await GPT_responder.get_response(
+        human_input=chat_messages
+    )
 
     response_message = models.ChatMessage(role="bot", content=chatbot_response)
     chatHistory = chat_history.markNewMessage(chatHistory, "bot", chatbot_response)
-    chatHistory_as_a_string = chat_history.formatChatHistory(chatHistory)
+    # chatHistory_as_a_string = chat_history.formatChatHistory(chatHistory)
 
     return response_message
 

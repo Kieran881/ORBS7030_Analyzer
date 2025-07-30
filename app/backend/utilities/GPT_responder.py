@@ -1,3 +1,17 @@
+# TODO: Create a proper system (developer) prompt, ask Dr Wu for examples to feed to LLM
+# TODO: Implement token counting mechanism so that the model output
+# won't get suddenly truncated (context window) - recommend user to clear chat history
+# TODO: Format chat history the way OpenAI expects - multiple messages, 
+# not just one big-ass message. Chat history as a list of dictionaries (messages),
+# rather than just one dictionary with very long message content
+# TODO: Implement the chat history compression where after we analyzed one notebook,
+# its content and analysises will not be in full text but rather as just a few sentences,
+# just enough to provide context for LLM on what happened before and nothing more
+# 
+# Some info about GPT4.1 for reference
+# 1,047,576 tokens context window
+# 32,768 tokens max output 
+
 """
 Get response from LLM (OpenRouter API) based on user input.
 User input is just a plain text, not analysis commands.
@@ -5,10 +19,11 @@ Output is the response from LLM, not analysis result.
 Input: human_input (str) - user input text
 Output: LLM response (str)
 """
-async def get_response(human_input: str) -> str:
+from openai.types.chat.chat_completion_message_param import ChatCompletionMessageParam
+async def get_response(human_input: list[ChatCompletionMessageParam]) -> str:
     from openai import OpenAI
     import os
-    from utilities.models import systemPrompt, developerPrompt
+    from utilities.models import LLM_MODEL, DEVELOPER_PROMPT
 
     try:
         OPEROUTER_API_KEY = os.environ.get("OPENROUTER_KEY")
@@ -20,24 +35,13 @@ async def get_response(human_input: str) -> str:
             base_url="https://openrouter.ai/api/v1",
             api_key=OPEROUTER_API_KEY,
         )
-        # For dev purposes override the uni prompts
-        # systemPrompt = "Output text in markdown format"
-        # developerPrompt = "Be yourself"
+        # For dev purposes override the uni prompt
+        developerPrompt = "Output text in markdown format"
         completion = client.chat.completions.create(
-            model="openai/gpt-4o",
+            model=LLM_MODEL,
             messages=[
-                {
-                    "role": "system",
-                    "content": systemPrompt
-                },
-                {
-                    "role": "developer",
-                    "content": developerPrompt
-                },
-                {
-                    "role": "user",
-                    "content": human_input
-                }
+                {"role": "developer", "content": developerPrompt},
+                *human_input 
             ]
         )
         LLM_outputDICT: dict = completion.to_dict()
@@ -55,7 +59,7 @@ Output: LLM analysis result (str)
 async def get_analysis(notebook_name: str) -> str:
     from openai import OpenAI
     import os
-    from utilities.models import systemPrompt, developerPrompt
+    from utilities.models import LLM_MODEL, DEVELOPER_PROMPT
 
     message: list = []
     try:
@@ -74,10 +78,10 @@ async def get_analysis(notebook_name: str) -> str:
             api_key=OPENROUTER_API_KEY,
         )
         # For dev purposes override the uni prompts
-        # systemPrompt = "Output text in markdown format"
-        # developerPrompt = "Be yourself"
+        systemPrompt = "Output text in markdown format"
+        developerPrompt = "Be yourself"
         completion = client.chat.completions.create(
-            model="openai/gpt-4o",
+            model=LLM_MODEL,
             messages=[
                 {
                     "role": "system",
