@@ -2,7 +2,7 @@ import os
 from fastapi import FastAPI, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from utilities import models, mark_file_upload, GPT_responder, parser
+from utilities import models, mark_file_upload, GPT_responder, parser, cleaner
 
 # Main FastAPI application
 app = FastAPI()
@@ -12,8 +12,11 @@ app.mount("/static", StaticFiles(directory="app/frontend/static", html=True), na
 
 # Store chat history for LLM reference (LLM-memory)
 chatHistory: list[models.ChatMessage] = []
+# Store the list of files user uploaded
 filesList: list[str] = []
+# To keep track of what notebook is analyzed now
 currentNotebook: int = 0
+# To determine if user uploaded files or not
 filesUploaded = False
 
 # Serve initial starting page
@@ -21,10 +24,12 @@ filesUploaded = False
 async def serve_index():
     global chatHistory
     chatHistory.clear()
+    cleaner.cleaner(os.path.join("app", "temp"))  # Clean temp folder
+    cleaner.cleaner(os.path.join("app", "uploaded")) # Clean uploaded folder
     return FileResponse(os.path.join("app", "frontend", "index.html"))
 
 # Clear chat history, LLM's memory
-# TODO: Modify to also clean up all the files
+# TODO: Modify to also clean up all the files from server memory
 @app.post("/clear-chat-history")
 async def clear_chat_history():
     global chatHistory
@@ -154,8 +159,6 @@ async def start_analysis():
     
     # Include list of notebook files to the history for LLM reference
     files_list: str = "Received Jupyter Notebooks:\n"
-    import os
-
     for file in os.listdir(os.path.join("app", "uploaded")):
         if file != ".gitkeep" and file != ".DS_Store":
             filesList.append(file)
@@ -164,7 +167,7 @@ async def start_analysis():
     chatbot_response = await GPT_responder.get_analysis(filesList[currentNotebook])
 
     user_input = f"*User used \"start\" command*\n \
-*Server sent to you the notebook \"{filesList[currentNotebook]}\"* \
+*Server sent to you the notebook \"{filesList[currentNotebook]}\"*\n \
 *\"{filesList[currentNotebook]}\" text content:*\n \
 {parser.getCellContent(txt_path=os.path.join("app", "temp", f"{filesList[currentNotebook][:-6]}.txt"))}"
 

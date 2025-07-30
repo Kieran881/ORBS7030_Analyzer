@@ -56,14 +56,14 @@ async def get_analysis(notebook_name: str) -> str:
         return "Sorry. Something went wrong with formatting your notebook for LLM"
 
     try:
-        OPEROUTER_API_KEY = os.environ.get("OPENROUTER_KEY")
+        OPENROUTER_API_KEY = os.environ.get("OPENROUTER_KEY")
     except:
         return "Sorry. Something went wrong with getting response from LLM (API key required)"
 
     try:
         client = OpenAI(
             base_url="https://openrouter.ai/api/v1",
-            api_key=OPEROUTER_API_KEY,
+            api_key=OPENROUTER_API_KEY,
         )
         # For dev purposes override the uni prompts
         # systemPrompt = "Output text in markdown format"
