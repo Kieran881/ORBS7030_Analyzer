@@ -1,82 +1,78 @@
-# Bytewise (Jupyter Notebook Analysis Module)
+# Bytewise - Jupyter Notebook Grading Assistant
 
-A web application for uploading and analyzing Jupyter notebook files using AI. Users can upload `.ipynb` files and interact with an AI assistant about their notebook content.
+**MVP Status: READY FOR PRODUCTION**
+
+A comprehensive web application designed for Hong Kong Baptist University's ORBS7030: Business Statistics with Python course. Enables instructors to upload student Jupyter notebooks and receive AI-powered analysis and grading suggestions.
+
+Youtube Demo -->: *https://youtu.be/wmKsvV70buE*
 
 ## Project Overview
 
-Bytewise is a full-stack application that processes Jupyter notebook files and provides an AI chat interface. The system handles file uploads, parses notebook content, and maintains conversation context for analysis discussions. See app/backend/models.py for system and developer prompts.
+Bytewise is a full-stack academic grading assistant that processes student Jupyter notebook submissions and provides intelligent analysis. The system handles secure file uploads, parses notebook content into LLM-friendly formats, and maintains contextual conversations for detailed grading discussions and even compraring student submissions with each other.
 
-## Features
+**Academic Context**: Built specifically for HKBU Mathematics Department's Business Statistics course, focusing on statistical inference methods and Python programming analysis. System prompt specifically was tailored for the course description and types of assignments.
 
-### File Upload & Processing
-- Multi-file upload with drag-and-drop interface
-- File validation (format, size, security checks)
-- Duplicate detection and prevention
-- Security measures: path traversal protection, 24MB file size limit
+## Core Features
 
-### AI Chat Interface
-- Persistent conversation memory during session
-- Context-aware responses using chat history
-- Real-time messaging interface
-- Chat history management (clear/refresh functionality)
+### File Management
+- **Multi-file drag-and-drop upload** with real-time validation
+- **Comprehensive security**: Path traversal protection, 24MB size limits, format validation
+- **Duplicate detection and removal** with automatic cleanup
+- **Support for multiple notebook formats**: Handles both the standard .ipynb from Jupyter Lab and .ipynb from VS Code
+- **Notebook parsing**: Unpacks Jupyter Notebook into ASCII text content and image charts, formats and packs them for sending to LLM
 
-### Notebook Processing
-User uploads a batch of `.ipynb` files. The system:
-1. **Validates and stores** files in the `/uploaded` directory
-2. **Parses notebook content** for structuring in more LLM-friendly format
-3. **Extracts components**: markdown cells, code cells, outputs, and metadata
-4. **Processes outputs**: text results (one .txt file) and PNG chart images (multiple .png images)
-5. **Archives processed content** as ZIP files for sending to LLM
+### AI-Powered Grading Assistant
+- **Persistent conversation memory** throughout grading sessions (however if page was refreshed, chatbot clears all memories - messages and uploaded files)
+- **Context-aware responses** using complete chat history
+- **Professional conversation interface** with user/assistant message distinction
 
-The parser handles both standard Jupyter JSON format and VS Code XML-based notebook format. No matter what software student used to create his Notebook, parser will work.
-
-## 📂 Project Structure
+## File Tree
 
 ```
 Bytewise/
 ├── app/
-│   ├── backend/
-│   │   ├── main.py                 # FastAPI server & API endpoints
-│   │   ├── utilities/
-│   │   │   ├── models.py          # Pydantic data models and system prompt
-│   │   │   ├── GPT_responder.py   # AI integration module
-│   │   │   ├── mark_file_upload.py # File upload marking (for chat history)
-│   │   │   ├── packager.py        # Notebook packaging utilities
-│   │   │   └── parser_pro.py      # Advanced notebook parsing
-│   │   └── temp/                  # Temporary notebook content processing
-│   ├── frontend/
-│   │   ├── index.html             # Main application interface
+│   ├── backend/                    # FastAPI Server
+│   │   ├── main.py                # API endpoints & logic
+│   │   └── utilities/
+│   │       ├── models.py          # Pydantic models & system prompt
+│   │       ├── GPT_responder.py   # OpenRouter AI integration
+│   │       ├── parser.py          # Notebook parsing 
+│   │       ├── chat_history.py    # Conversation history management
+│   │       └── cleaner.py         
+│   ├── frontend/                  # Client Interface
+│   │   ├── index.html            
 │   │   └── static/
-│   │       ├── script.js          # Frontend JavaScript logic
-│   │       └── style.css          # Custom styling
-│   └── uploaded/                  # User-uploaded notebook storage
-├── lib/                           # Python virtual environment
-├── bin/                           # Virtual environment binaries
-└── README.md                      # This file
+│   │       ├── script.js         
+│   │       └── style.css         
+│   ├── uploaded/                 # Student notebook storage
+│   └── temp/                     # Processing workspace
+├── lib/                          
+├── bin/                          
+└── README.md                     # Documentation
 ```
 
-## 📋 API Documentation
+---
 
-### **Endpoints**
+## API Reference
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/` | Serve main application interface |
-| `POST` | `/chatbot-answer` | Send message to AI assistant |
-| `POST` | `/files-upload` | Upload Jupyter notebook files |
-| `POST` | `/clear-chat-history` | Clear conversation memory |
+| Method | Endpoint | Purpose | Status |
+|--------|----------|---------|--------|
+| `GET` | `/` | Serve main application interface | Ready |
+| `POST` | `/chatbot-answer` | Send message to AI assistant | Ready |
+| `POST` | `/files-upload` | Upload student notebook files | Ready |
+| `POST` | `/analyze` | Start notebook analysis workflow | Ready |
+| `POST` | `/clear-chat-history` | Reset conversation memory | Ready |
 
-## Current Status
+## MVP Implementation Status
 
-### Working Features
-- File upload pipeline with validation and security measures
-- AI chat interface with persistent conversation memory
-- Notebook parsing
-- Web interface
-- Conversation with AI
-- File archiving and packaging utilities
-<br><br> --> Note: Although chatting with AI and file processing & storing works, the functionality to send those parsed Notebook to LLM is not yet implemented.
+### Fully Implemented and Tested
+- **Complete file upload pipeline** with validation and security
+- **AI chat interface** with OpenRouter GPT-4o integration
+- **Multi-format notebook parsing** (JSON/XML compatibility)
+- **Responsive web interface** with modern UX patterns
+- **Conversation memory management** with persistent context
+- **File processing workflows** with automatic cleanup
+- **Error handling and user feedback** for all operations
+- **Academic-focused system prompts** for grading consistency
 
-### In Development
-- **LLM file content integration** - Sending processed notebook content to AI for analysis
-- **Export functionality** - Download processed content and analysis results
+*This application represents a complete, deployable solution for academic notebook grading with AI assistance. All core functionality has been implemented and tested for university environments.*
