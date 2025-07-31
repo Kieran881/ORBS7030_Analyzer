@@ -1,14 +1,3 @@
-# TODO: Create a proper system (developer) prompt, ask Dr Wu for examples to feed to LLM
-# TODO: Implement token counting mechanism so that the model output
-# won't get suddenly truncated (context window) - recommend user to clear chat history
-# TODO -- Done: Format chat history the way OpenAI expects - multiple messages, 
-# not just one big-ass message. Chat history as a list of dictionaries (messages),
-# rather than just one dictionary with very long message content
-# 
-# Some info about GPT4.1 for reference
-# 1,047,576 tokens context window
-# 32,768 tokens max output 
-
 """
 Get response from LLM (OpenRouter API) based on user input.
 User input is just a plain text, not analysis commands.

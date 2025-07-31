@@ -96,8 +96,9 @@ document.addEventListener('DOMContentLoaded', () => {
         if (chatbotAnswered == false) return;
         chatbotAnswered = false;
 
-        if ((message.toLowerCase() === "/start") || (message.toLowerCase() === "start")) {
-            console.log("Starting analysis of the first notebook")
+        if ((message.toLowerCase() === "/start") || (message.toLowerCase() === "start") || 
+        (message.toLowerCase() === "/next") || (message.toLowerCase() === "next")) {
+            console.log("Starting analysis of the notebook")
 
             addMessage(message, 'user');
 
@@ -108,18 +109,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // Trigger sending request to analysis endpoint
             fetchChatbotAnalysis(message)
         } 
-        else if ((message.toLowerCase() === "/next") || (message.toLowerCase() === "next")) {
-            console.log("Onto the next one")
-
-            addMessage(message, 'user');
-
-            messageInput.value = '';
-            sendBtn.disabled = true;
-            sendBtn.classList.remove('text-blue-500');
-            sendBtn.classList.add('text-gray-500');
-            // Trigger sending request to endpoint
-            addMessage("I received your \"\next\" command", 'assistant'); // for dev, for now
-        }
         else {
             // Add user message to chat
             // Using addMessage function, this function is
@@ -170,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchChatbotAnalysis(message) {
         try {
             // Send POST request to the backend API
-            const response = await fetch('http://127.0.0.1:8000/start-analysis', {
+            const response = await fetch('http://127.0.0.1:8000/analyze', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

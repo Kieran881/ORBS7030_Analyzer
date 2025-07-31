@@ -1,4 +1,5 @@
-# TODO: Create a proper system (developer) prompt, ask Dr Wu for examples to feed to LLM
+# TODO -- DONE: Create a proper system (developer) prompt
+# TODO: Implement /next command handling
 # 
 # Some info about GPT4.1 for reference
 # --> 1,047,576 tokens context window
@@ -71,6 +72,12 @@ async def chatbot_answer(message: models.ChatMessage):
     tokens = chat_history.calculateTokens(chatHistory)
     print(tokens)
 
+    # Store chaHistory content in new .txt file called history.txt
+    history_file_path = os.path.join("app", "temp", "history.txt")
+    with open(history_file_path, "w", encoding="utf-8") as history_file:
+        for message in chatHistory:
+            history_file.write(f"{message.role}: {message.content}\n")
+
     if tokens >= models.CONTEXT_WINDOW_LIMIT:
         chatbot_response += "<br><br>*SYSTEM WARNING*: Chat memory is full! Chatbot\'s responses are now unreliable and unpredictable. Chat memory refresh is strongly recommended!"
         response_message = models.ChatMessage(role="assistant", content=chatbot_response)
@@ -93,6 +100,9 @@ async def process_files(files: list[UploadFile]):
 
     cleaner.clean(os.path.join("app", "temp"))  
     cleaner.clean(os.path.join("app", "uploaded")) 
+
+    global filesList
+    filesList.clear()
 
     # Different checks & saving the files
     for file in files:
@@ -154,13 +164,22 @@ async def process_files(files: list[UploadFile]):
     # On my OS this is done automatically, not so sure about other platforms
     cleaner.removeDuplicates(os.path.join("app", "uploaded"))
 
+    # Include list of notebook files to the history for LLM reference
+    for file in os.listdir(os.path.join("app", "uploaded")):
+        if file != ".gitkeep" and file != ".DS_Store":
+            filesList.append(file) 
+    filesList = list(set(filesList)) 
+
     global filesUploaded
     filesUploaded = True
+
+    global currentNotebook
+    currentNotebook = 0
 
     return total_response
 
 # API endpoint to enter file analysis cycle
-@app.post("/start-analysis")
+@app.post("/analyze")
 async def start_analysis():
     global filesList
     global currentNotebook
@@ -175,13 +194,6 @@ async def start_analysis():
         chatHistory = chat_history.markNewMessage(chatHistory, "assistant", response_message.content)
         return response_message
     
-    # Include list of notebook files to the history for LLM reference
-    files_list: str = "Received Jupyter Notebooks:\n"
-    for file in os.listdir(os.path.join("app", "uploaded")):
-        if file != ".gitkeep" and file != ".DS_Store":
-            filesList.append(file)
-            files_list = files_list + file + '\n' 
-
     if currentNotebook >= len(filesList):
         response_message = models.ChatMessage(
             role="assistant", content="No more Notebooks left to analyze. If you have more, please upload them"
