@@ -1,5 +1,5 @@
-# TODO -- DONE: Create a proper system (developer) prompt, ask Dr Wu for examples to feed to LLM
-# TODO: Implement token counting mechanism so that the model output
+# TODO: Create a proper system (developer) prompt, ask Dr Wu for examples to feed to LLM
+# TODO -- DONE: Implement token counting mechanism so that the model output
 # won't get suddenly truncated (context window) - recommend user to clear chat history
 # TODO -- DONE: Format chat history the way OpenAI expects - multiple messages, 
 # not just one big-ass message. Chat history as a list of dictionaries (messages),
