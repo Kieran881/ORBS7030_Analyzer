@@ -63,9 +63,23 @@ def markContentSending(filesList, currentNotebook) -> str:
 
     return user_input
 
-def reductPreviousNotebookContent(history: str, filesList, currentNotebook) -> str:
-    previousNotebookContent = markContentSending(filesList, currentNotebook)
-    shortened_entry = f"*You and User analyzed the notebook \"{filesList[currentNotebook]}\"*\n"
-    history = history.replace(previousNotebookContent, shortened_entry)
+from utilities.models import ChatMessage as ChatMessage
+def calculateTokens(chat: list[_ChatMessage]) -> int:
+    # Input: 
+    # Output: 8
+    import tiktoken
+    from utilities.models import MODEL_ENCODING
+    
+    history = ""
+    for message in chat:
+        if message.role == "user":
+            content: str = message.content
+            history += f"user: {content}\n"
+        if message.role == "bot" or message.role == "assistant":
+            content: str = message.content
+            history += f"assistant: {content}\n"
 
-    return history
+    encoding = tiktoken.get_encoding(MODEL_ENCODING)
+    numberOfTokens: int = len(encoding.encode(history))
+    
+    return numberOfTokens

@@ -118,7 +118,7 @@ document.addEventListener('DOMContentLoaded', () => {
             sendBtn.classList.remove('text-blue-500');
             sendBtn.classList.add('text-gray-500');
             // Trigger sending request to endpoint
-            addMessage("I received your \"\next\" command", 'bot'); // for dev, for now
+            addMessage("I received your \"\next\" command", 'assistant'); // for dev, for now
         }
         else {
             // Add user message to chat
@@ -158,12 +158,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const botMessage = await response.json();
             // Add bot response to chat
-            addMessage(botMessage.content, 'bot');
+            addMessage(botMessage.content, 'assistant');
             chatbotAnswered = true;
         } catch (error) {
             console.error('Error fetching chatbot answer:', error);
             // Add error message to chat
-            addMessage('Sorry, I could not process your request. Please try again later.', 'bot');
+            addMessage('Sorry, I could not process your request. Please try again later.', 'assistant');
         }
     }
     // Backend API call for handling /start command
@@ -184,12 +184,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const botMessage = await response.json();
             // Add bot response to chat
-            addMessage(botMessage.content, 'bot');
+            addMessage(botMessage.content, 'assistant');
             chatbotAnswered = true;
         } catch (error) {
             console.error('Error fetching chatbot answer:', error);
             // Add error message to chat
-            addMessage('Sorry, I could not process your request. Please try again later.', 'bot');
+            addMessage('Sorry, I could not process your request. Please try again later.', 'assistant');
         }
     }
 
@@ -212,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const iconBgClass = (sender === 'user' ? 'bg-gray-200' : 'bg-blue-100');
         const iconColorClass = (sender === 'user' ? 'text-gray-500' : 'text-blue-500');
         const marginClass = (sender === 'user' ? 'ml-2' : 'mr-2');
-        const messageClass = (sender === 'user' ? 'message user-message p-3 shadow-sm' : 'message bot-message p-3 shadow-sm');
+        const messageClass = (sender === 'user' ? 'message user-message p-3 shadow-sm' : 'message assistant-message p-3 shadow-sm');
 
         const markdownContent = text
 
@@ -418,7 +418,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 handleUploadResponse(uploadResult);
             } catch (error) {
                 console.error('Upload error:', error);
-                addMessage('Sorry, there was an error uploading your files. Please try again.', 'bot');
+                addMessage('Sorry, there was an error uploading your files. Please try again.', 'assistant');
             }
         }
 
@@ -481,7 +481,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Show the response message
         setTimeout(() => {
-            addMessage(responseMessage, 'bot');
+            addMessage(responseMessage, 'assistant');
         }, 500);
     }
 

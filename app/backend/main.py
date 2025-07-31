@@ -1,4 +1,4 @@
-# TODO: Create a proper system (developer) prompt, ask Dr Wu for examples to feed to LLM
+# TODO -- DONE: Create a proper system (developer) prompt, ask Dr Wu for examples to feed to LLM
 # TODO: Implement token counting mechanism so that the model output
 # won't get suddenly truncated (context window) - recommend user to clear chat history
 # TODO -- DONE: Format chat history the way OpenAI expects - multiple messages, 
@@ -8,16 +8,17 @@
 # its content and analysises will not be in full text but rather as just a few sentences,
 # just enough to provide context for LLM on what happened before and nothing more
 # Status: Since analyzing one notebook is ~15k tokens and we have 1000k tokens for context,
-# probably unneccessary feature
+# probably unneccessary feature. We can spend 15k tokens per each notebook and we 
+# will be able to do so for around 60-65 notebooks, should be enough for one class
 # 
 # Some info about GPT4.1 for reference
-# 1,047,576 tokens context window
-# 32,768 tokens max output 
+# --> 1,047,576 tokens context window
+# --> 32,768 tokens max output 
 import os
 from fastapi import FastAPI, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
-from utilities import models, chat_history, GPT_responder, parser, cleaner
+from utilities import models, chat_history, GPT_responder, cleaner
 
 # Main FastAPI application
 app = FastAPI()
@@ -72,12 +73,18 @@ async def chatbot_answer(message: models.ChatMessage):
     chat_messages = chat_history.formatChatHistory(chatHistory)
 
     # human_inout is now a list of dictionaries with previous messages and the current one
-    print(chat_messages)
+    # print(chat_messages) # for dev purposes
     chatbot_response = await GPT_responder.get_response(human_input=chat_messages)
 
     # Update history for using in other request endpoints 
-    response_message = models.ChatMessage(role="bot", content=chatbot_response)
-    chatHistory = chat_history.markNewMessage(chatHistory, "bot", chatbot_response)
+    response_message = models.ChatMessage(role="assistant", content=chatbot_response)
+    chatHistory = chat_history.markNewMessage(chatHistory, "assistant", chatbot_response)
+    tokens = chat_history.calculateTokens(chatHistory)
+
+    if tokens >= models.CONTEXT_WINDOW_LIMIT:
+        chatbot_response += "<br><br>*SYSTEM WARNING*: Chat memory is full! Chatbot\'s responses are now unreliable and unpredictable. Chat memory refresh is strongly recommended!"
+        response_message = models.ChatMessage(role="assistant", content=chatbot_response)
+        return response_message
 
     return response_message
 
@@ -173,9 +180,9 @@ async def start_analysis():
     response_message: models.ChatMessage
     if filesUploaded == False:
         response_message = models.ChatMessage(
-            role="bot", content="No Jupyter Notebooks found. Make sure to send them first!")
+            role="assistant", content="No Jupyter Notebooks found. Make sure to send them first!")
         chatHistory = chat_history.markNewMessage(chatHistory, "user", "*/start*")
-        chatHistory = chat_history.markNewMessage(chatHistory, "bot", response_message.content)
+        chatHistory = chat_history.markNewMessage(chatHistory, "assistant", response_message.content)
         return response_message
     
     # Include list of notebook files to the history for LLM reference
@@ -187,10 +194,10 @@ async def start_analysis():
 
     if currentNotebook >= len(filesList):
         response_message = models.ChatMessage(
-            role="bot", content="No more Notebooks left to analyze. If you have more, please upload them"
+            role="assistant", content="No more Notebooks left to analyze. If you have more, please upload them"
         )
         chatHistory = chat_history.markNewMessage(chatHistory, "user", "*/start*")
-        chatHistory = chat_history.markNewMessage(chatHistory, "bot", response_message.content)
+        chatHistory = chat_history.markNewMessage(chatHistory, "assistant", response_message.content)
         return response_message
     
     chatbot_response = await GPT_responder.get_analysis(filesList[currentNotebook])
@@ -198,10 +205,16 @@ async def start_analysis():
     user_input = chat_history.markContentSending(filesList, currentNotebook)
 
     chatHistory = chat_history.markNewMessage(chatHistory, "user", user_input)
-    chatHistory = chat_history.markNewMessage(chatHistory, "bot", chatbot_response)
+    chatHistory = chat_history.markNewMessage(chatHistory, "assistant", chatbot_response)
 
-    response_message = models.ChatMessage(role="bot", content=chatbot_response)
+    response_message = models.ChatMessage(role="assistant", content=chatbot_response)
     
+    tokens = chat_history.calculateTokens(chatHistory)
+    if tokens >= models.CONTEXT_WINDOW_LIMIT:
+        chatbot_response += "<br><br>*SYSTEM WARNING*: Chat memory is full! Chatbot\'s responses are now unreliable and unpredictable. Chat memory refresh is strongly recommended!"
+        response_message = models.ChatMessage(role="assistant", content=chatbot_response)
+        return response_message
+
     currentNotebook += 1
 
     return response_message

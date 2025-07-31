@@ -6,6 +6,8 @@ class ChatMessage(BaseModel):
     content: str
 
 LLM_MODEL = "openai/gpt-4.1-2025-04-14"
+MODEL_ENCODING = "o200k_base"
+CONTEXT_WINDOW_LIMIT = 1_047_576 # tokens
 
 DEVELOPER_PROMPT = """
 <Here goes our super duper majestic asf system (developer) prompt>
