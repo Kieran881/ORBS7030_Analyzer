@@ -1,15 +1,4 @@
 # TODO: Create a proper system (developer) prompt, ask Dr Wu for examples to feed to LLM
-# TODO -- DONE: Implement token counting mechanism so that the model output
-# won't get suddenly truncated (context window) - recommend user to clear chat history
-# TODO -- DONE: Format chat history the way OpenAI expects - multiple messages, 
-# not just one big-ass message. Chat history as a list of dictionaries (messages),
-# rather than just one dictionary with very long message content
-# not todo: Implement the chat history compression where after we analyzed one notebook,
-# its content and analysises will not be in full text but rather as just a few sentences,
-# just enough to provide context for LLM on what happened before and nothing more
-# Status: Since analyzing one notebook is ~15k tokens and we have 1000k tokens for context,
-# probably unneccessary feature. We can spend 15k tokens per each notebook and we 
-# will be able to do so for around 60-65 notebooks, should be enough for one class
 # 
 # Some info about GPT4.1 for reference
 # --> 1,047,576 tokens context window
@@ -80,6 +69,7 @@ async def chatbot_answer(message: models.ChatMessage):
     response_message = models.ChatMessage(role="assistant", content=chatbot_response)
     chatHistory = chat_history.markNewMessage(chatHistory, "assistant", chatbot_response)
     tokens = chat_history.calculateTokens(chatHistory)
+    print(tokens)
 
     if tokens >= models.CONTEXT_WINDOW_LIMIT:
         chatbot_response += "<br><br>*SYSTEM WARNING*: Chat memory is full! Chatbot\'s responses are now unreliable and unpredictable. Chat memory refresh is strongly recommended!"
@@ -210,6 +200,7 @@ async def start_analysis():
     response_message = models.ChatMessage(role="assistant", content=chatbot_response)
     
     tokens = chat_history.calculateTokens(chatHistory)
+    print(tokens)
     if tokens >= models.CONTEXT_WINDOW_LIMIT:
         chatbot_response += "<br><br>*SYSTEM WARNING*: Chat memory is full! Chatbot\'s responses are now unreliable and unpredictable. Chat memory refresh is strongly recommended!"
         response_message = models.ChatMessage(role="assistant", content=chatbot_response)

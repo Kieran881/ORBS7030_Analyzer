@@ -20,7 +20,7 @@ from openai.types.chat.chat_completion_message_param import ChatCompletionMessag
 async def get_response(human_input: list[ChatCompletionMessageParam]) -> str:
     from openai import OpenAI
     import os
-    from utilities.models import LLM_MODEL
+    from utilities.models import LLM_MODEL, DEVELOPER_PROMPT
 
     try:
         OPEROUTER_API_KEY = os.environ.get("OPENROUTER_KEY")
@@ -33,7 +33,7 @@ async def get_response(human_input: list[ChatCompletionMessageParam]) -> str:
             api_key=OPEROUTER_API_KEY,
         )
         # For dev purposes override the uni prompt
-        DEVELOPER_PROMPT = "Output text in markdown format"
+        # DEVELOPER_PROMPT = "Output text in markdown format"
         completion = client.chat.completions.create(
             model=LLM_MODEL,
             messages=[
@@ -75,7 +75,7 @@ async def get_analysis(notebook_name: str) -> str:
             api_key=OPENROUTER_API_KEY,
         )
         # For dev purposes override the uni prompts
-        DEVELOPER_PROMPT = "Output text in markdown format"
+        # DEVELOPER_PROMPT = "Output text in markdown format"
         completion = client.chat.completions.create(
             model=LLM_MODEL,
             messages=[
