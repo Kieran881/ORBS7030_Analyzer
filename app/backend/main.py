@@ -1,6 +1,3 @@
-# TODO -- DONE: Create a proper system (developer) prompt
-# TODO: Implement /next command handling
-# 
 # Some info about GPT4.1 for reference
 # --> 1,047,576 tokens context window
 # --> 32,768 tokens max output 
@@ -33,6 +30,14 @@ async def serve_index():
 
     chatHistory.clear()
     filesUploaded = False
+
+    # Ensure temp directory exists
+    temp_dir = os.path.join("app", "temp") 
+    os.makedirs(temp_dir, exist_ok=True)
+
+    # Ensure upload directory exists
+    upload_dir = os.path.join("app", "uploaded") 
+    os.makedirs(upload_dir, exist_ok=True)
 
     cleaner.clean(os.path.join("app", "temp"))  # Clean temp folder
     cleaner.clean(os.path.join("app", "uploaded")) # Clean uploaded folder
@@ -93,10 +98,8 @@ async def chatbot_answer(message: models.ChatMessage):
 async def process_files(files: list[UploadFile]):    
     total_response: dict[str, dict[str, str | bool]] = {}
     global chatHistory
-    
-    # Ensure upload directory exists
-    upload_dir = os.path.join("app", "uploaded") 
-    os.makedirs(upload_dir, exist_ok=True)
+
+    upload_dir = os.path.join("app", "uploaded")
 
     cleaner.clean(os.path.join("app", "temp"))  
     cleaner.clean(os.path.join("app", "uploaded")) 
