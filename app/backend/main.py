@@ -75,7 +75,6 @@ async def chatbot_answer(message: models.ChatMessage):
     response_message = models.ChatMessage(role="assistant", content=chatbot_response)
     chatHistory = chat_history.markNewMessage(chatHistory, "assistant", chatbot_response)
     tokens = chat_history.calculateTokens(chatHistory)
-    print(tokens)
 
     # Store chaHistory content in new .txt file called history.txt
     history_file_path = os.path.join("app", "temp", "history.txt")
@@ -201,7 +200,7 @@ async def start_analysis():
         response_message = models.ChatMessage(
             role="assistant", content="No more Notebooks left to analyze. If you have more, please upload them"
         )
-        chatHistory = chat_history.markNewMessage(chatHistory, "user", "*/start*")
+        chatHistory = chat_history.markNewMessage(chatHistory, "user", "*/next*")
         chatHistory = chat_history.markNewMessage(chatHistory, "assistant", response_message.content)
         return response_message
     
